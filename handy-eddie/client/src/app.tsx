@@ -1,0 +1,165 @@
+import { useState, useEffect, useRef } from 'preact/hooks'
+
+interface MouseAction {
+  type: 'move' | 'click'
+  x?: number
+  y?: number
+  button?: 'left' | 'right' | 'middle'
+}
+
+export function App() {
+  const [connected, setConnected] = useState(false)
+  const [status, setStatus] = useState('Disconnected')
+  const wsRef = useRef<WebSocket | null>(null)
+  const touchpadRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const lastPosRef = useRef({ x: 0, y: 0 })
+
+  useEffect(() => {
+    connectWebSocket()
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
+      }
+    }
+  }, [])
+
+  const connectWebSocket = () => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const wsUrl = `${protocol}//${window.location.host}/`
+    
+    try {
+      const ws = new WebSocket(wsUrl)
+      
+      ws.onopen = () => {
+        setConnected(true)
+        setStatus('Connected')
+        wsRef.current = ws
+      }
+      
+      ws.onclose = () => {
+        setConnected(false)
+        setStatus('Disconnected')
+        wsRef.current = null
+        setTimeout(connectWebSocket, 3000)
+      }
+      
+      ws.onerror = () => {
+        setStatus('Connection Error')
+      }
+    } catch (error) {
+      setStatus('Connection Error')
+      setTimeout(connectWebSocket, 3000)
+    }
+  }
+
+  const sendCommand = (action: MouseAction) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(action))
+    }
+  }
+
+  const handleTouchStart = (e: TouchEvent) => {
+    e.preventDefault()
+    isDraggingRef.current = true
+    const touch = e.touches[0]
+    lastPosRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    e.preventDefault()
+    if (!isDraggingRef.current) return
+    
+    const touch = e.touches[0]
+    const deltaX = touch.clientX - lastPosRef.current.x
+    const deltaY = touch.clientY - lastPosRef.current.y
+    
+    const sensitivity = 2.5
+    const moveX = Math.round(deltaX * sensitivity)
+    const moveY = Math.round(deltaY * sensitivity)
+    
+    if (Math.abs(moveX) > 0 || Math.abs(moveY) > 0) {
+      sendCommand({
+        type: 'move',
+        x: moveX,
+        y: moveY
+      })
+    }
+    
+    lastPosRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    e.preventDefault()
+    isDraggingRef.current = false
+  }
+
+  useEffect(() => {
+    const touchpad = touchpadRef.current
+    if (touchpad) {
+      touchpad.addEventListener('touchstart', handleTouchStart, { passive: false })
+      touchpad.addEventListener('touchmove', handleTouchMove, { passive: false })
+      touchpad.addEventListener('touchend', handleTouchEnd, { passive: false })
+      
+      return () => {
+        touchpad.removeEventListener('touchstart', handleTouchStart)
+        touchpad.removeEventListener('touchmove', handleTouchMove)
+        touchpad.removeEventListener('touchend', handleTouchEnd)
+      }
+    }
+  }, [])
+
+  const handleClick = (button: 'left' | 'right' | 'middle') => {
+    sendCommand({ type: 'click', button })
+  }
+
+  return (
+    <div className="flex flex-col h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <div className="bg-gray-800 p-4 shadow-lg">
+        <h1 className="text-xl font-bold text-center">Handy Eddie</h1>
+        <div className={`text-center text-sm mt-1 ${connected ? 'text-green-400' : 'text-red-400'}`}>
+          {status}
+        </div>
+      </div>
+
+      {/* Touchpad Area */}
+      <div 
+        ref={touchpadRef}
+        className="flex-1 bg-gray-700 m-4 rounded-lg flex items-center justify-center touch-none select-none"
+        style={{ minHeight: '60vh' }}
+      >
+        <div className="text-gray-400 text-center pointer-events-none">
+          <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+          <p className="text-sm">Touch and drag to move cursor</p>
+        </div>
+      </div>
+
+      {/* Button Controls */}
+      <div className="p-4 space-y-3">
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            onClick={() => handleClick('left')}
+            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 px-4 rounded-lg shadow-lg transition-colors"
+          >
+            Left Click
+          </button>
+          <button
+            onClick={() => handleClick('middle')}
+            className="bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-4 px-4 rounded-lg shadow-lg transition-colors"
+          >
+            Middle
+          </button>
+          <button
+            onClick={() => handleClick('right')}
+            className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-4 px-4 rounded-lg shadow-lg transition-colors"
+          >
+            Right Click
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

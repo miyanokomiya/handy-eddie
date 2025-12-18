@@ -1,0 +1,142 @@
+﻿namespace handy_eddie
+{
+    partial class Form1
+    {
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+        private PictureBox pictureBoxQR;
+        private TextBox textBoxLog;
+        private Label labelUrl;
+        private Button buttonStart;
+        private Button buttonStop;
+        private NumericUpDown numericUpDownPort;
+        private Label labelPort;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            SuspendLayout();
+            // 
+            // pictureBoxQR
+            // 
+            pictureBoxQR = new PictureBox();
+            pictureBoxQR.BorderStyle = BorderStyle.FixedSingle;
+            pictureBoxQR.Location = new Point(12, 50);
+            pictureBoxQR.Name = "pictureBoxQR";
+            pictureBoxQR.Size = new Size(300, 300);
+            pictureBoxQR.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxQR.TabIndex = 0;
+            pictureBoxQR.TabStop = false;
+            // 
+            // textBoxLog
+            // 
+            textBoxLog = new TextBox();
+            textBoxLog.Location = new Point(330, 50);
+            textBoxLog.Multiline = true;
+            textBoxLog.Name = "textBoxLog";
+            textBoxLog.ReadOnly = true;
+            textBoxLog.ScrollBars = ScrollBars.Vertical;
+            textBoxLog.Size = new Size(458, 388);
+            textBoxLog.TabIndex = 1;
+            // 
+            // labelUrl
+            // 
+            labelUrl = new Label();
+            labelUrl.AutoSize = true;
+            labelUrl.Font = new Font("Segoe UI", 12F);
+            labelUrl.Location = new Point(12, 360);
+            labelUrl.Name = "labelUrl";
+            labelUrl.Size = new Size(100, 21);
+            labelUrl.TabIndex = 2;
+            labelUrl.Text = "Server URL: ";
+            // 
+            // buttonStart
+            // 
+            buttonStart = new Button();
+            buttonStart.Location = new Point(12, 12);
+            buttonStart.Name = "buttonStart";
+            buttonStart.Size = new Size(100, 30);
+            buttonStart.TabIndex = 3;
+            buttonStart.Text = "Start Server";
+            buttonStart.UseVisualStyleBackColor = true;
+            buttonStart.Click += buttonStart_Click;
+            // 
+            // buttonStop
+            // 
+            buttonStop = new Button();
+            buttonStop.Enabled = false;
+            buttonStop.Location = new Point(118, 12);
+            buttonStop.Name = "buttonStop";
+            buttonStop.Size = new Size(100, 30);
+            buttonStop.TabIndex = 4;
+            buttonStop.Text = "Stop Server";
+            buttonStop.UseVisualStyleBackColor = true;
+            buttonStop.Click += buttonStop_Click;
+            // 
+            // labelPort
+            // 
+            labelPort = new Label();
+            labelPort.AutoSize = true;
+            labelPort.Location = new Point(240, 18);
+            labelPort.Name = "labelPort";
+            labelPort.Size = new Size(32, 15);
+            labelPort.TabIndex = 5;
+            labelPort.Text = "Port:";
+            // 
+            // numericUpDownPort
+            // 
+            numericUpDownPort = new NumericUpDown();
+            numericUpDownPort.Location = new Point(278, 15);
+            numericUpDownPort.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
+            numericUpDownPort.Minimum = new decimal(new int[] { 1024, 0, 0, 0 });
+            numericUpDownPort.Name = "numericUpDownPort";
+            numericUpDownPort.Size = new Size(80, 23);
+            numericUpDownPort.TabIndex = 6;
+            numericUpDownPort.Value = new decimal(new int[] { 8080, 0, 0, 0 });
+            ((System.ComponentModel.ISupportInitialize)numericUpDownPort).BeginInit();
+            // 
+            // Form1
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(numericUpDownPort);
+            Controls.Add(labelPort);
+            Controls.Add(buttonStop);
+            Controls.Add(buttonStart);
+            Controls.Add(labelUrl);
+            Controls.Add(textBoxLog);
+            Controls.Add(pictureBoxQR);
+            Name = "Form1";
+            Text = "Handy Eddie - Mobile Mouse Controller";
+            Load += Form1_Load;
+            FormClosing += Form1_FormClosing;
+            ((System.ComponentModel.ISupportInitialize)pictureBoxQR).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownPort).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        #endregion
+    }
+}
