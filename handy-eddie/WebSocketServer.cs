@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Diagnostics;
 
 namespace handy_eddie
 {
@@ -34,6 +35,65 @@ namespace handy_eddie
             return "127.0.0.1";
         }
 
+        private void EnsureFirewallRule()
+        {
+            try
+            {
+                var exePath = Process.GetCurrentProcess().MainModule?.FileName;
+                if (string.IsNullOrEmpty(exePath))
+                    return;
+
+                // Remove any existing rule first to ensure clean state
+                var removeProcess = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "netsh",
+                        Arguments = $"advfirewall firewall delete rule name=\"Handy Eddie Server\"",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    }
+                };
+
+                removeProcess.Start();
+                removeProcess.WaitForExit();
+
+                // Add a comprehensive rule that allows all inbound connections on the port
+                var addRuleProcess = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "netsh",
+                        Arguments = $"advfirewall firewall add rule name=\"Handy Eddie Server\" dir=in action=allow protocol=TCP localport={port} profile=any enable=yes",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    }
+                };
+
+                addRuleProcess.Start();
+                var output = addRuleProcess.StandardOutput.ReadToEnd();
+                var error = addRuleProcess.StandardError.ReadToEnd();
+                addRuleProcess.WaitForExit();
+                
+                if (addRuleProcess.ExitCode == 0)
+                {
+                    LogMessage?.Invoke(this, $"Firewall rule configured for port {port} (all profiles)");
+                }
+                else
+                {
+                    LogMessage?.Invoke(this, $"Firewall rule creation failed: {error}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage?.Invoke(this, $"Warning: Could not configure firewall rule: {ex.Message}");
+            }
+        }
+
         public async Task StartAsync()
         {
             if (isRunning) return;
@@ -47,10 +107,15 @@ namespace handy_eddie
             
             try
             {
+                EnsureFirewallRule();
+
                 httpListener.Start();
                 isRunning = true;
 
                 LogMessage?.Invoke(this, $"Server started at http://{localIp}:{port}/");
+                LogMessage?.Invoke(this, $"Listening on all interfaces - accessible from other devices");
+                LogMessage?.Invoke(this, $"Test from mobile: http://{localIp}:{port}/");
+                LogMessage?.Invoke(this, $"Test from PC: http://localhost:{port}/");
 
                 _ = Task.Run(async () =>
                 {
@@ -59,6 +124,8 @@ namespace handy_eddie
                         try
                         {
                             var context = await httpListener.GetContextAsync();
+                            var clientIp = context.Request.RemoteEndPoint?.Address.ToString() ?? "unknown";
+                            LogMessage?.Invoke(this, $"Incoming connection from: {clientIp}");
                             _ = Task.Run(() => HandleRequestAsync(context));
                         }
                         catch (Exception ex)
