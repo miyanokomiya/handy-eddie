@@ -26,6 +26,8 @@ namespace handy_eddie
         private const uint MOUSEEVENTF_RIGHTUP = 0x0010;
         private const uint MOUSEEVENTF_MIDDLEDOWN = 0x0020;
         private const uint MOUSEEVENTF_MIDDLEUP = 0x0040;
+        private const uint MOUSEEVENTF_WHEEL = 0x0800;
+        private const uint MOUSEEVENTF_HWHEEL = 0x01000;
 
         public void Move(int x, int y)
         {
@@ -65,6 +67,21 @@ namespace handy_eddie
 
             mouse_event(downFlag, 0, 0, 0, 0);
             mouse_event(upFlag, 0, 0, 0, 0);
+        }
+
+        public void Scroll(double deltaX, double deltaY)
+        {
+            if (deltaY != 0)
+            {
+                int scrollAmount = (int)(-deltaY);
+                mouse_event(MOUSEEVENTF_WHEEL, 0, 0, (uint)scrollAmount, 0);
+            }
+
+            if (deltaX != 0)
+            {
+                int scrollAmount = (int)deltaX;
+                mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, (uint)scrollAmount, 0);
+            }
         }
     }
 }

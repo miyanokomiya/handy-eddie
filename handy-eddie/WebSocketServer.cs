@@ -259,6 +259,20 @@ namespace handy_eddie
                             }
                         }
                         break;
+
+                    case "scroll":
+                        if (root.TryGetProperty("deltaX", out var deltaXElement) &&
+                            root.TryGetProperty("deltaY", out var deltaYElement))
+                        {
+                            var deltaX = deltaXElement.GetDouble();
+                            var deltaY = deltaYElement.GetDouble();
+                            mouseController.Scroll(deltaX, deltaY);
+                            if (debugLogging)
+                            {
+                                LogMessage?.Invoke(this, $"Scroll: ({deltaX}, {deltaY})");
+                            }
+                        }
+                        break;
                 }
             }
             catch (Exception ex)
