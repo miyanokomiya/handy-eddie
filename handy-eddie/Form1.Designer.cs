@@ -121,8 +121,6 @@
             // checkBoxDebugLog
             // 
             checkBoxDebugLog.AutoSize = true;
-            checkBoxDebugLog.Checked = true;
-            checkBoxDebugLog.CheckState = CheckState.Checked;
             checkBoxDebugLog.Location = new Point(380, 18);
             checkBoxDebugLog.Name = "checkBoxDebugLog";
             checkBoxDebugLog.Size = new Size(81, 19);

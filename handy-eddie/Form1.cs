@@ -14,6 +14,7 @@ namespace handy_eddie
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            checkBoxDebugLog.Checked = System.Diagnostics.Debugger.IsAttached;
             LogMessage("Ready to start server");
         }
 
