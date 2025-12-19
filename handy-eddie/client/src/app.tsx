@@ -14,6 +14,9 @@ export function App() {
   const touchpadRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const lastPosRef = useRef({ x: 0, y: 0 })
+  const touchStartTimeRef = useRef(0)
+  const touchStartPosRef = useRef({ x: 0, y: 0 })
+  const hasMoved = useRef(false)
 
   useEffect(() => {
     connectWebSocket()
@@ -62,8 +65,11 @@ export function App() {
   const handleTouchStart = (e: TouchEvent) => {
     e.preventDefault()
     isDraggingRef.current = true
+    hasMoved.current = false
     const touch = e.touches[0]
     lastPosRef.current = { x: touch.clientX, y: touch.clientY }
+    touchStartTimeRef.current = Date.now()
+    touchStartPosRef.current = { x: touch.clientX, y: touch.clientY }
   }
 
   const handleTouchMove = (e: TouchEvent) => {
@@ -86,12 +92,27 @@ export function App() {
       })
     }
     
+    const totalDelta = Math.abs(deltaX) + Math.abs(deltaY)
+    if (totalDelta > 5) {
+      hasMoved.current = true
+    }
+    
     lastPosRef.current = { x: touch.clientX, y: touch.clientY }
   }
 
   const handleTouchEnd = (e: TouchEvent) => {
     e.preventDefault()
     isDraggingRef.current = false
+    
+    const touchDuration = Date.now() - touchStartTimeRef.current
+    const touch = e.changedTouches[0]
+    const deltaX = Math.abs(touch.clientX - touchStartPosRef.current.x)
+    const deltaY = Math.abs(touch.clientY - touchStartPosRef.current.y)
+    const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+    
+    if (touchDuration < 300 && totalMovement < 15 && !hasMoved.current) {
+      sendCommand({ type: 'click', button: 'left' })
+    }
   }
 
   useEffect(() => {
