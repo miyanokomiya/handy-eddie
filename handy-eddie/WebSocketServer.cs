@@ -13,6 +13,7 @@ namespace handy_eddie
         private readonly MouseController mouseController;
         private HttpListener? httpListener;
         private bool isRunning;
+        private bool debugLogging = true;
 
         public event EventHandler<string>? LogMessage;
 
@@ -20,6 +21,12 @@ namespace handy_eddie
         {
             this.port = port;
             this.mouseController = new MouseController();
+        }
+
+        public bool DebugLogging
+        {
+            get => debugLogging;
+            set => debugLogging = value;
         }
 
         public string GetLocalIPAddress()
@@ -234,7 +241,10 @@ namespace handy_eddie
                             var x = xElement.GetInt32();
                             var y = yElement.GetInt32();
                             mouseController.MoveRelative(x, y);
-                            LogMessage?.Invoke(this, $"Move: ({x}, {y})");
+                            if (debugLogging)
+                            {
+                                LogMessage?.Invoke(this, $"Move: ({x}, {y})");
+                            }
                         }
                         break;
 
@@ -243,7 +253,10 @@ namespace handy_eddie
                         {
                             var button = buttonElement.GetString() ?? "left";
                             mouseController.Click(button);
-                            LogMessage?.Invoke(this, $"Click: {button}");
+                            if (debugLogging)
+                            {
+                                LogMessage?.Invoke(this, $"Click: {button}");
+                            }
                         }
                         break;
                 }

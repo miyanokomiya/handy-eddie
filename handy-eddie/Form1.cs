@@ -23,6 +23,7 @@ namespace handy_eddie
             {
                 int port = (int)numericUpDownPort.Value;
                 server = new WebSocketServer(port);
+                server.DebugLogging = checkBoxDebugLog.Checked;
                 server.LogMessage += (s, msg) => LogMessage(msg);
 
                 await server.StartAsync();
@@ -63,6 +64,15 @@ namespace handy_eddie
         private void buttonStop_Click(object sender, EventArgs e)
         {
             StopServer();
+        }
+
+        private void checkBoxDebugLog_CheckedChanged(object sender, EventArgs e)
+        {
+            if (server != null)
+            {
+                server.DebugLogging = checkBoxDebugLog.Checked;
+                LogMessage($"Debug logging {(checkBoxDebugLog.Checked ? "enabled" : "disabled")}");
+            }
         }
 
         private void StopServer()

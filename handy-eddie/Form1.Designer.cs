@@ -13,6 +13,7 @@
         private Button buttonStop;
         private NumericUpDown numericUpDownPort;
         private Label labelPort;
+        private CheckBox checkBoxDebugLog;
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -35,11 +36,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            pictureBoxQR = new PictureBox();
+            textBoxLog = new TextBox();
+            labelUrl = new Label();
+            buttonStart = new Button();
+            buttonStop = new Button();
+            labelPort = new Label();
+            numericUpDownPort = new NumericUpDown();
+            checkBoxDebugLog = new CheckBox();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxQR).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownPort).BeginInit();
             SuspendLayout();
             // 
             // pictureBoxQR
             // 
-            pictureBoxQR = new PictureBox();
             pictureBoxQR.BorderStyle = BorderStyle.FixedSingle;
             pictureBoxQR.Location = new Point(12, 50);
             pictureBoxQR.Name = "pictureBoxQR";
@@ -50,7 +60,6 @@
             // 
             // textBoxLog
             // 
-            textBoxLog = new TextBox();
             textBoxLog.Location = new Point(330, 50);
             textBoxLog.Multiline = true;
             textBoxLog.Name = "textBoxLog";
@@ -61,18 +70,16 @@
             // 
             // labelUrl
             // 
-            labelUrl = new Label();
             labelUrl.AutoSize = true;
             labelUrl.Font = new Font("Segoe UI", 12F);
             labelUrl.Location = new Point(12, 360);
             labelUrl.Name = "labelUrl";
-            labelUrl.Size = new Size(100, 21);
+            labelUrl.Size = new Size(95, 21);
             labelUrl.TabIndex = 2;
             labelUrl.Text = "Server URL: ";
             // 
             // buttonStart
             // 
-            buttonStart = new Button();
             buttonStart.Location = new Point(12, 12);
             buttonStart.Name = "buttonStart";
             buttonStart.Size = new Size(100, 30);
@@ -83,7 +90,6 @@
             // 
             // buttonStop
             // 
-            buttonStop = new Button();
             buttonStop.Enabled = false;
             buttonStop.Location = new Point(118, 12);
             buttonStop.Name = "buttonStop";
@@ -95,7 +101,6 @@
             // 
             // labelPort
             // 
-            labelPort = new Label();
             labelPort.AutoSize = true;
             labelPort.Location = new Point(240, 18);
             labelPort.Name = "labelPort";
@@ -105,7 +110,6 @@
             // 
             // numericUpDownPort
             // 
-            numericUpDownPort = new NumericUpDown();
             numericUpDownPort.Location = new Point(278, 15);
             numericUpDownPort.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
             numericUpDownPort.Minimum = new decimal(new int[] { 1024, 0, 0, 0 });
@@ -113,13 +117,26 @@
             numericUpDownPort.Size = new Size(80, 23);
             numericUpDownPort.TabIndex = 6;
             numericUpDownPort.Value = new decimal(new int[] { 8080, 0, 0, 0 });
-            ((System.ComponentModel.ISupportInitialize)numericUpDownPort).BeginInit();
+            // 
+            // checkBoxDebugLog
+            // 
+            checkBoxDebugLog.AutoSize = true;
+            checkBoxDebugLog.Checked = true;
+            checkBoxDebugLog.CheckState = CheckState.Checked;
+            checkBoxDebugLog.Location = new Point(380, 18);
+            checkBoxDebugLog.Name = "checkBoxDebugLog";
+            checkBoxDebugLog.Size = new Size(81, 19);
+            checkBoxDebugLog.TabIndex = 7;
+            checkBoxDebugLog.Text = "Debug log";
+            checkBoxDebugLog.UseVisualStyleBackColor = true;
+            checkBoxDebugLog.CheckedChanged += checkBoxDebugLog_CheckedChanged;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(checkBoxDebugLog);
             Controls.Add(numericUpDownPort);
             Controls.Add(labelPort);
             Controls.Add(buttonStop);
@@ -129,8 +146,8 @@
             Controls.Add(pictureBoxQR);
             Name = "Form1";
             Text = "Handy Eddie - Mobile Mouse Controller";
-            Load += Form1_Load;
             FormClosing += Form1_FormClosing;
+            Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBoxQR).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownPort).EndInit();
             ResumeLayout(false);
