@@ -18,39 +18,56 @@ export function App() {
   const touchStartTimeRef = useRef(0)
   const touchStartPosRef = useRef({ x: 0, y: 0 })
   const hasMoved = useRef(false)
+  const reconnectTimeoutRef = useRef<number | null>(null)
 
   const connectWebSocket = () => {
+    if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) return
+
+    // Clear any pending reconnection timeout
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsUrl = `${protocol}//${window.location.host}/`
+    const ws = new WebSocket(wsUrl)
 
-    try {
-      const ws = new WebSocket(wsUrl)
+    ws.onopen = () => {
+      setConnected(true)
+      setStatus('Connected')
+      wsRef.current = ws
+    }
 
-      ws.onopen = () => {
-        setConnected(true)
-        setStatus('Connected')
-        wsRef.current = ws
-      }
+    ws.onclose = () => {
+      setConnected(false)
+      setStatus('Disconnected')
+      wsRef.current = null
+      reconnectTimeoutRef.current = setTimeout(connectWebSocket, 3000) as any
+    }
 
-      ws.onclose = () => {
-        setConnected(false)
-        setStatus('Disconnected')
-        wsRef.current = null
-        setTimeout(connectWebSocket, 3000)
-      }
-
-      ws.onerror = () => {
-        setStatus('Connection Error')
-      }
-    } catch (error) {
+    ws.onerror = () => {
       setStatus('Connection Error')
-      setTimeout(connectWebSocket, 3000)
     }
   }
 
   useEffect(() => {
     connectWebSocket()
+
+    // Handle visibility change to reconnect when tab becomes active
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        connectWebSocket()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
       if (wsRef.current) {
         wsRef.current.close()
       }
