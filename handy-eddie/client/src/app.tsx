@@ -23,6 +23,8 @@ const DEFAULT_SENSITIVITY = {
 export function App() {
   const [connected, setConnected] = useState(false)
   const [status, setStatus] = useState('Disconnected')
+  const [isReconnecting, setIsReconnecting] = useState(false)
+  const [hasAttemptedConnection, setHasAttemptedConnection] = useState(false)
   const [pointerLocked, setPointerLocked] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -65,6 +67,9 @@ export function App() {
       reconnectTimeoutRef.current = null
     }
 
+    setStatus('Connecting...')
+    setIsReconnecting(true)
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsUrl = `${protocol}//${window.location.host}/`
     const ws = new WebSocket(wsUrl)
@@ -72,18 +77,24 @@ export function App() {
     ws.onopen = () => {
       setConnected(true)
       setStatus('Connected')
+      setIsReconnecting(false)
+      setHasAttemptedConnection(true)
       wsRef.current = ws
     }
 
     ws.onclose = () => {
       setConnected(false)
       setStatus('Disconnected')
+      setIsReconnecting(false)
+      setHasAttemptedConnection(true)
       wsRef.current = null
       reconnectTimeoutRef.current = setTimeout(connectWebSocket, 3000) as any
     }
 
     ws.onerror = () => {
       setStatus('Connection Error')
+      setIsReconnecting(false)
+      setHasAttemptedConnection(true)
     }
   }
 
@@ -367,13 +378,21 @@ export function App() {
     sendCommand({ type: 'click', button })
   }
 
+  const handleReconnect = () => {
+    if (wsRef.current) {
+      wsRef.current.close()
+      wsRef.current = null
+    }
+    connectWebSocket()
+  }
+
   return (
     <div className="flex flex-col h-svh bg-gray-900 text-white">
       {/* Header */}
       <div className="bg-gray-800 px-4 py-1 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="w-8"></div>
-          <div className={`text-center text-lg mt-1 ${connected ? 'text-green-400' : 'text-red-400'}`}>
+          <div className={`text-center text-lg mt-1 ${connected ? 'text-green-400' : isReconnecting ? 'text-yellow-400' : 'text-red-400'}`}>
             {status}
           </div>
           <button
@@ -398,21 +417,42 @@ export function App() {
           style={{ cursor: pointerLocked ? 'none' : 'pointer' }}
         >
           <div className="text-gray-400 text-center pointer-events-none">
-            <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-            </svg>
-            {pointerLocked ? (
+            {!connected && hasAttemptedConnection && !pointerLocked && (
               <>
-                <p className="text-xl font-semibold text-green-400 mb-1">Mouse Locked</p>
-                <p className="text-lg">Move mouse to control cursor</p>
-                <p className="text-lg">Press ESC to exit</p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg">Touch and drag to move cursor</p>
-                <p className="text-lg mt-1">Or click to lock mouse</p>
+                <p className="text-xl font-semibold text-red-400 mb-3">Not Connected</p>
+                <button
+                  onClick={handleReconnect}
+                  disabled={isReconnecting}
+                  className={`pointer-events-auto px-6 py-3 rounded-lg font-semibold text-lg transition-colors ${isReconnecting
+                    ? 'bg-yellow-600 cursor-wait'
+                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                    }`}
+                >
+                  {isReconnecting ? 'Connecting...' : 'Reconnect'}
+                </button>
               </>
             )}
+            {
+              connected ? (
+                <>
+                  <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                  </svg>
+                  {pointerLocked ? (
+                    <>
+                      <p className="text-xl font-semibold text-green-400 mb-1">Mouse Locked</p>
+                      <p className="text-lg">Move mouse to control cursor</p>
+                      <p className="text-lg">Press ESC to exit</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-lg">Touch and drag to move cursor</p>
+                      <p className="text-lg mt-1">Or click to lock mouse</p>
+                    </>
+                  )}
+                </>
+              ) : undefined
+            }
           </div>
         </div>
 
