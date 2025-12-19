@@ -233,14 +233,14 @@ export function App() {
           </svg>
           {pointerLocked ? (
             <>
-              <p className="text-sm font-semibold text-green-400 mb-1">Mouse Locked</p>
-              <p className="text-xs">Move mouse to control cursor</p>
-              <p className="text-xs">Press ESC to exit</p>
+              <p className="text-xl font-semibold text-green-400 mb-1">Mouse Locked</p>
+              <p className="text-lg">Move mouse to control cursor</p>
+              <p className="text-lg">Press ESC to exit</p>
             </>
           ) : (
             <>
-              <p className="text-sm">Touch and drag to move cursor</p>
-              <p className="text-xs mt-1">Or click to lock mouse</p>
+              <p className="text-lg">Touch and drag to move cursor</p>
+              <p className="text-lg mt-1">Or click to lock mouse</p>
             </>
           )}
         </div>
