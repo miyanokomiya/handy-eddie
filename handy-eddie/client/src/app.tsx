@@ -365,7 +365,7 @@ export function App() {
       <div className="bg-gray-800 px-4 py-1 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="w-8"></div>
-          <div className={`text-center text-sm mt-1 ${connected ? 'text-green-400' : 'text-red-400'}`}>
+          <div className={`text-center text-lg mt-1 ${connected ? 'text-green-400' : 'text-red-400'}`}>
             {status}
           </div>
           <button
@@ -387,7 +387,7 @@ export function App() {
         <div
           ref={touchpadRef}
           className="flex-1 bg-gray-700 rounded-lg flex items-center justify-center touch-none select-none"
-          style={{ minHeight: '60vh', cursor: pointerLocked ? 'none' : 'pointer' }}
+          style={{ cursor: pointerLocked ? 'none' : 'pointer' }}
         >
           <div className="text-gray-400 text-center pointer-events-none">
             <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,7 +412,7 @@ export function App() {
         {isTouchDevice && (
           <div
             ref={vScrollBarRef}
-            className="w-12 bg-gray-600 rounded-lg flex items-center justify-center touch-none select-none active:bg-gray-500"
+            className="w-16 bg-gray-600 rounded-lg flex items-center justify-center touch-none select-none active:bg-gray-500"
           >
             <div className="text-gray-400 text-center pointer-events-none">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -428,7 +428,7 @@ export function App() {
         {isTouchDevice && (
           <div
             ref={hScrollBarRef}
-            className="h-12 bg-gray-600 rounded-lg flex items-center justify-center touch-none select-none active:bg-gray-500 mb-2"
+            className="h-16 bg-gray-600 rounded-lg flex items-center justify-center touch-none select-none active:bg-gray-500 mb-2"
           >
             <div className="text-gray-400 text-center pointer-events-none">
               <svg className="w-6 h-6 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -442,19 +442,19 @@ export function App() {
         <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => handleClick('left')}
-            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 px-4 rounded-lg shadow-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-colors"
           >
             Left Click
           </button>
           <button
             onClick={() => handleClick('middle')}
-            className="bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-4 px-4 rounded-lg shadow-lg transition-colors"
+            className="bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-colors"
           >
             Middle
           </button>
           <button
             onClick={() => handleClick('right')}
-            className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-4 px-4 rounded-lg shadow-lg transition-colors"
+            className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-colors"
           >
             Right Click
           </button>
