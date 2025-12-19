@@ -139,8 +139,16 @@ export function App() {
     if (!isDraggingRef.current) return
 
     const touch = e.touches[0]
-    const deltaX = touch.clientX - lastPosRef.current.x
-    const deltaY = touch.clientY - lastPosRef.current.y
+    let deltaX = touch.clientX - lastPosRef.current.x
+    let deltaY = touch.clientY - lastPosRef.current.y
+
+    // Apply clamping only for the first 0.5 seconds to prevent initial jump
+    const timeSinceTouchStart = Date.now() - touchStartTimeRef.current
+    if (timeSinceTouchStart < 100) {
+      const maxInitialDelta = 2 // Maximum pixels for any single movement
+      deltaX = Math.max(-maxInitialDelta, Math.min(maxInitialDelta, deltaX))
+      deltaY = Math.max(-maxInitialDelta, Math.min(maxInitialDelta, deltaY))
+    }
 
     const moveX = Math.round(deltaX * mouseSensitivity)
     const moveY = Math.round(deltaY * mouseSensitivity)
