@@ -118,7 +118,7 @@ export function App() {
     }
   }
 
-  const handleMouseClick = (e: MouseEvent) => {
+  const handleMouseClick = () => {
     if (!pointerLocked && touchpadRef.current) {
       touchpadRef.current.requestPointerLock()
     }
@@ -196,7 +196,7 @@ export function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-svh bg-gray-900 text-white">
       {/* Header */}
       <div className="bg-gray-800 px-4 py-1 shadow-lg">
         <div className={`text-center text-sm mt-1 ${connected ? 'text-green-400' : 'text-red-400'}`}>
