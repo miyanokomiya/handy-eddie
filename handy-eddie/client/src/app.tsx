@@ -18,35 +18,26 @@ export function App() {
   const touchStartPosRef = useRef({ x: 0, y: 0 })
   const hasMoved = useRef(false)
 
-  useEffect(() => {
-    connectWebSocket()
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close()
-      }
-    }
-  }, [])
-
   const connectWebSocket = () => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsUrl = `${protocol}//${window.location.host}/`
-    
+
     try {
       const ws = new WebSocket(wsUrl)
-      
+
       ws.onopen = () => {
         setConnected(true)
         setStatus('Connected')
         wsRef.current = ws
       }
-      
+
       ws.onclose = () => {
         setConnected(false)
         setStatus('Disconnected')
         wsRef.current = null
         setTimeout(connectWebSocket, 3000)
       }
-      
+
       ws.onerror = () => {
         setStatus('Connection Error')
       }
@@ -56,9 +47,20 @@ export function App() {
     }
   }
 
+  useEffect(() => {
+    connectWebSocket()
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
+      }
+    }
+  }, [])
+
   const sendCommand = (action: MouseAction) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(action))
+    } else {
+      console.log(action)
     }
   }
 
@@ -75,15 +77,15 @@ export function App() {
   const handleTouchMove = (e: TouchEvent) => {
     e.preventDefault()
     if (!isDraggingRef.current) return
-    
+
     const touch = e.touches[0]
     const deltaX = touch.clientX - lastPosRef.current.x
     const deltaY = touch.clientY - lastPosRef.current.y
-    
+
     const sensitivity = 2.5
     const moveX = Math.round(deltaX * sensitivity)
     const moveY = Math.round(deltaY * sensitivity)
-    
+
     if (Math.abs(moveX) > 0 || Math.abs(moveY) > 0) {
       sendCommand({
         type: 'move',
@@ -91,25 +93,25 @@ export function App() {
         y: moveY
       })
     }
-    
+
     const totalDelta = Math.abs(deltaX) + Math.abs(deltaY)
     if (totalDelta > 5) {
       hasMoved.current = true
     }
-    
+
     lastPosRef.current = { x: touch.clientX, y: touch.clientY }
   }
 
   const handleTouchEnd = (e: TouchEvent) => {
     e.preventDefault()
     isDraggingRef.current = false
-    
+
     const touchDuration = Date.now() - touchStartTimeRef.current
     const touch = e.changedTouches[0]
     const deltaX = Math.abs(touch.clientX - touchStartPosRef.current.x)
     const deltaY = Math.abs(touch.clientY - touchStartPosRef.current.y)
     const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-    
+
     if (touchDuration < 300 && totalMovement < 15 && !hasMoved.current) {
       sendCommand({ type: 'click', button: 'left' })
     }
@@ -121,7 +123,7 @@ export function App() {
       touchpad.addEventListener('touchstart', handleTouchStart, { passive: false })
       touchpad.addEventListener('touchmove', handleTouchMove, { passive: false })
       touchpad.addEventListener('touchend', handleTouchEnd, { passive: false })
-      
+
       return () => {
         touchpad.removeEventListener('touchstart', handleTouchStart)
         touchpad.removeEventListener('touchmove', handleTouchMove)
@@ -137,17 +139,16 @@ export function App() {
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Header */}
-      <div className="bg-gray-800 p-4 shadow-lg">
-        <h1 className="text-xl font-bold text-center">Handy Eddie</h1>
+      <div className="bg-gray-800 px-4 py-1 shadow-lg">
         <div className={`text-center text-sm mt-1 ${connected ? 'text-green-400' : 'text-red-400'}`}>
           {status}
         </div>
       </div>
 
       {/* Touchpad Area */}
-      <div 
+      <div
         ref={touchpadRef}
-        className="flex-1 bg-gray-700 m-4 rounded-lg flex items-center justify-center touch-none select-none"
+        className="flex-1 bg-gray-700 m-2 rounded-lg flex items-center justify-center touch-none select-none"
         style={{ minHeight: '60vh' }}
       >
         <div className="text-gray-400 text-center pointer-events-none">
@@ -159,8 +160,8 @@ export function App() {
       </div>
 
       {/* Button Controls */}
-      <div className="p-4 space-y-3">
-        <div className="grid grid-cols-3 gap-3">
+      <div className="px-2">
+        <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => handleClick('left')}
             className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 px-4 rounded-lg shadow-lg transition-colors"
