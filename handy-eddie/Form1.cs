@@ -23,13 +23,20 @@ namespace handy_eddie
             try
             {
                 int port = (int)numericUpDownPort.Value;
-                server = new WebSocketServer(port);
+                bool secureMode = checkBoxSecureMode.Checked;
+                
+                server = new WebSocketServer(port, secureMode);
                 server.DebugLogging = checkBoxDebugLog.Checked;
                 server.LogMessage += (s, msg) => LogMessage(msg);
 
                 await server.StartAsync();
 
                 var url = $"http://{server.GetLocalIPAddress()}:{port}/";
+                if (secureMode && !string.IsNullOrEmpty(server.SecurityCode))
+                {
+                    url += $"?code={server.SecurityCode}";
+                }
+                
                 labelUrl.Text = $"Server URL: {url}";
 
                 GenerateQRCode(url);
@@ -37,7 +44,12 @@ namespace handy_eddie
                 buttonStart.Enabled = false;
                 buttonStop.Enabled = true;
                 numericUpDownPort.Enabled = false;
+                checkBoxSecureMode.Enabled = false;
 
+                if (secureMode)
+                {
+                    LogMessage($"Secure mode enabled with code: {server.SecurityCode}");
+                }
                 LogMessage("Server started successfully");
             }
             catch (UnauthorizedAccessException ex)
@@ -87,6 +99,7 @@ namespace handy_eddie
                 buttonStart.Enabled = true;
                 buttonStop.Enabled = false;
                 numericUpDownPort.Enabled = true;
+                checkBoxSecureMode.Enabled = true;
                 LogMessage("Server stopped");
             }
         }

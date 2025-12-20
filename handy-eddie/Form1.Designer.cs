@@ -14,6 +14,7 @@
         private NumericUpDown numericUpDownPort;
         private Label labelPort;
         private CheckBox checkBoxDebugLog;
+        private CheckBox checkBoxSecureMode;
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -45,6 +46,7 @@
             labelPort = new Label();
             numericUpDownPort = new NumericUpDown();
             checkBoxDebugLog = new CheckBox();
+            checkBoxSecureMode = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)pictureBoxQR).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownPort).BeginInit();
             SuspendLayout();
@@ -130,11 +132,22 @@
             checkBoxDebugLog.UseVisualStyleBackColor = true;
             checkBoxDebugLog.CheckedChanged += checkBoxDebugLog_CheckedChanged;
             // 
+            // checkBoxSecureMode
+            // 
+            checkBoxSecureMode.AutoSize = true;
+            checkBoxSecureMode.Location = new Point(480, 18);
+            checkBoxSecureMode.Name = "checkBoxSecureMode";
+            checkBoxSecureMode.Size = new Size(95, 19);
+            checkBoxSecureMode.TabIndex = 8;
+            checkBoxSecureMode.Text = "Secure mode";
+            checkBoxSecureMode.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(checkBoxSecureMode);
             Controls.Add(checkBoxDebugLog);
             Controls.Add(numericUpDownPort);
             Controls.Add(labelPort);

@@ -4,12 +4,15 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace handy_eddie
 {
     public class WebSocketServer
     {
         private readonly int port;
+        private readonly bool secureMode;
+        private readonly string? securityCode;
         private readonly MouseController mouseController;
         private readonly SystemController systemController;
         private readonly KeyboardController keyboardController;
@@ -20,9 +23,11 @@ namespace handy_eddie
 
         public event EventHandler<string>? LogMessage;
 
-        public WebSocketServer(int port)
+        public WebSocketServer(int port, bool secureMode = false)
         {
             this.port = port;
+            this.secureMode = secureMode;
+            this.securityCode = secureMode ? GenerateSecurityCode() : null;
             this.mouseController = new MouseController();
             this.systemController = new SystemController();
             this.keyboardController = new KeyboardController();
@@ -34,6 +39,22 @@ namespace handy_eddie
         {
             get => debugLogging;
             set => debugLogging = value;
+        }
+
+        public string? SecurityCode => securityCode;
+
+        private static string GenerateSecurityCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var code = new char[16];
+            var bytes = RandomNumberGenerator.GetBytes(16);
+            
+            for (int i = 0; i < 16; i++)
+            {
+                code[i] = chars[bytes[i] % chars.Length];
+            }
+            
+            return new string(code);
         }
 
         public string GetLocalIPAddress()
@@ -186,6 +207,40 @@ namespace handy_eddie
 
         private async Task HandleWebSocketAsync(HttpListenerContext context)
         {
+            // Validate security code if secure mode is enabled
+            if (secureMode)
+            {
+                var query = context.Request.Url?.Query;
+                var codeMatch = false;
+                
+                if (!string.IsNullOrEmpty(query))
+                {
+                    // Parse query string manually
+                    var queryString = query.TrimStart('?');
+                    var pairs = queryString.Split('&');
+                    
+                    foreach (var pair in pairs)
+                    {
+                        var parts = pair.Split('=');
+                        if (parts.Length == 2 && parts[0] == "code")
+                        {
+                            var providedCode = Uri.UnescapeDataString(parts[1]);
+                            codeMatch = providedCode == securityCode;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!codeMatch)
+                {
+                    LogMessage?.Invoke(this, "WebSocket connection rejected: Invalid or missing security code");
+                    context.Response.StatusCode = 403;
+                    context.Response.StatusDescription = "Forbidden";
+                    context.Response.Close();
+                    return;
+                }
+            }
+
             HttpListenerWebSocketContext webSocketContext;
             try
             {

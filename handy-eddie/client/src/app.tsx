@@ -93,7 +93,9 @@ export function App() {
     setIsReconnecting(true)
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `${protocol}//${window.location.host}/`
+    // Include the query string (security code) if present
+    const queryString = window.location.search
+    const wsUrl = `${protocol}//${window.location.host}/${queryString}`
     const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
