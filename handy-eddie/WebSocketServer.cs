@@ -360,20 +360,34 @@ namespace handy_eddie
             var contentType = GetContentType(path);
             response.ContentType = contentType;
 
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", path.TrimStart('/'));
+            // Try to read from embedded resources first
+            var resourceName = $"handy_eddie.wwwroot.{path.TrimStart('/').Replace('/', '.')}";
 
-            if (File.Exists(filePath))
+            using var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+            if (stream != null)
             {
-                var content = await File.ReadAllBytesAsync(filePath);
+                var content = new byte[stream.Length];
+                await stream.ReadAsync(content);
                 response.ContentLength64 = content.Length;
                 await response.OutputStream.WriteAsync(content);
             }
             else
             {
-                response.StatusCode = 404;
-                var notFound = Encoding.UTF8.GetBytes("404 Not Found");
-                response.ContentLength64 = notFound.Length;
-                await response.OutputStream.WriteAsync(notFound);
+                // Fallback to file system (for development)
+                var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", path.TrimStart('/'));
+                if (File.Exists(filePath))
+                {
+                    var content = await File.ReadAllBytesAsync(filePath);
+                    response.ContentLength64 = content.Length;
+                    await response.OutputStream.WriteAsync(content);
+                }
+                else
+                {
+                    response.StatusCode = 404;
+                    var notFound = Encoding.UTF8.GetBytes("404 Not Found");
+                    response.ContentLength64 = notFound.Length;
+                    await response.OutputStream.WriteAsync(notFound);
+                }
             }
 
             response.Close();
