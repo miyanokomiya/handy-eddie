@@ -11,6 +11,7 @@ namespace handy_eddie
     {
         private readonly int port;
         private readonly MouseController mouseController;
+        private readonly SystemController systemController;
         private HttpListener? httpListener;
         private bool isRunning;
         private bool debugLogging = true;
@@ -21,6 +22,8 @@ namespace handy_eddie
         {
             this.port = port;
             this.mouseController = new MouseController();
+            this.systemController = new SystemController();
+            this.systemController.LogMessage += (s, msg) => LogMessage?.Invoke(this, msg);
         }
 
         public bool DebugLogging
@@ -271,6 +274,15 @@ namespace handy_eddie
                             {
                                 LogMessage?.Invoke(this, $"Scroll: ({deltaX}, {deltaY})");
                             }
+                        }
+                        break;
+
+                    case "system":
+                        if (root.TryGetProperty("command", out var commandElement))
+                        {
+                            var command = commandElement.GetString() ?? "";
+                            LogMessage?.Invoke(this, $"System command: {command}");
+                            systemController.ExecuteCommand(command);
                         }
                         break;
                 }

@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'preact/hooks'
 import { Settings } from './Settings'
+import { SystemCommands } from './SystemCommands'
 
 interface MouseAction {
-  type: 'move' | 'click' | 'scroll'
+  type: 'move' | 'click' | 'scroll' | 'system'
   x?: number
   y?: number
   button?: 'left' | 'right' | 'middle'
   deltaX?: number
   deltaY?: number
+  command?: string
 }
 
 const STORAGE_KEYS = {
@@ -20,6 +22,8 @@ const DEFAULT_SENSITIVITY = {
   SCROLL: 3
 } as const
 
+type DialogType = 'none' | 'settings' | 'system'
+
 export function App() {
   const [connected, setConnected] = useState(false)
   const [status, setStatus] = useState('Disconnected')
@@ -27,7 +31,7 @@ export function App() {
   const [hasAttemptedConnection, setHasAttemptedConnection] = useState(false)
   const [pointerLocked, setPointerLocked] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [openDialog, setOpenDialog] = useState<DialogType>('none')
   const [mouseSensitivity, setMouseSensitivity] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.MOUSE_SENSITIVITY)
     return saved ? parseFloat(saved) : DEFAULT_SENSITIVITY.MOUSE
@@ -133,6 +137,10 @@ export function App() {
     } else {
       console.log(action)
     }
+  }
+
+  const sendSystemCommand = (command: string) => {
+    sendCommand({ type: 'system', command })
   }
 
   const handleTouchStart = (e: TouchEvent) => {
@@ -391,12 +399,20 @@ export function App() {
       {/* Header */}
       <div className="bg-gray-800 px-4 py-1 shadow-lg">
         <div className="flex items-center justify-between">
-          <div className="w-8"></div>
+          <button
+            onClick={() => setOpenDialog('system')}
+            className="text-gray-400 hover:text-white transition-colors p-1"
+            title="System Commands"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </button>
           <div className={`text-center text-lg mt-1 ${connected ? 'text-green-400' : isReconnecting ? 'text-yellow-400' : 'text-red-400'}`}>
             {status}
           </div>
           <button
-            onClick={() => setIsSettingsOpen(true)}
+            onClick={() => setOpenDialog('settings')}
             className="text-gray-400 hover:text-white transition-colors p-1"
             title="Settings"
           >
@@ -511,14 +527,22 @@ export function App() {
 
       {/* Settings Panel */}
       <Settings
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        isOpen={openDialog === 'settings'}
+        onClose={() => setOpenDialog('none')}
         mouseSensitivity={mouseSensitivity}
         onMouseSensitivityChange={setMouseSensitivity}
         scrollSensitivity={scrollSensitivity}
         onScrollSensitivityChange={setScrollSensitivity}
         defaultMouseSensitivity={DEFAULT_SENSITIVITY.MOUSE}
         defaultScrollSensitivity={DEFAULT_SENSITIVITY.SCROLL}
+      />
+
+      {/* System Commands Panel */}
+      <SystemCommands
+        isOpen={openDialog === 'system'}
+        onClose={() => setOpenDialog('none')}
+        onExecuteCommand={sendSystemCommand}
+        connected={connected}
       />
     </div>
   )
