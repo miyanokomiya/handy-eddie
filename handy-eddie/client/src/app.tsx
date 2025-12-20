@@ -11,7 +11,7 @@ import { VideoControls } from './VideoControls'
 import { ArrowControls } from './ArrowControls'
 
 interface MouseAction {
-  type: 'move' | 'click' | 'scroll' | 'system' | 'keyboard' | 'media'
+  type: 'move' | 'click' | 'scroll' | 'system' | 'keyboard' | 'media' | 'mousedown' | 'mouseup'
   x?: number
   y?: number
   button?: 'left' | 'right' | 'middle' | 'back' | 'forward'
@@ -43,6 +43,7 @@ export function App() {
   const [hasAttemptedConnection, setHasAttemptedConnection] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [openDialog, setOpenDialog] = useState<DialogType>('none')
+  const [heldButton, setHeldButton] = useState<'left' | 'right' | 'middle' | null>(null)
   const [mouseSensitivity, setMouseSensitivity] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.MOUSE_SENSITIVITY)
     return saved ? parseFloat(saved) : DEFAULT_SENSITIVITY.MOUSE
@@ -92,7 +93,7 @@ export function App() {
     setStatus('Connecting...')
     setIsReconnecting(true)
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws'
     // Include the query string (security code) if present
     const queryString = window.location.search
     const wsUrl = `${protocol}//${window.location.host}/${queryString}`
@@ -193,6 +194,7 @@ export function App() {
           hasAttemptedConnection={hasAttemptedConnection}
           isReconnecting={isReconnecting}
           mouseSensitivity={mouseSensitivity}
+          heldButton={heldButton}
           onSendCommand={sendCommand}
           onReconnect={handleReconnect}
         />
@@ -222,7 +224,11 @@ export function App() {
           <ArrowControls onSendCommand={sendCommand} connected={connected} />
         )}
 
-        <MouseButtons onSendCommand={sendCommand} />
+        <MouseButtons 
+          onSendCommand={sendCommand} 
+          heldButton={heldButton}
+          onButtonHold={setHeldButton}
+        />
         
         <TextInput ref={textInputRef} onSendCommand={sendCommand} connected={connected} />
       </div>

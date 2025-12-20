@@ -5,12 +5,13 @@ interface TouchpadProps {
   hasAttemptedConnection: boolean
   isReconnecting: boolean
   mouseSensitivity: number
+  heldButton: 'left' | 'right' | 'middle' | null
   onSendCommand: (action: MouseAction) => void
   onReconnect: () => void
 }
 
 interface MouseAction {
-  type: 'move' | 'click' | 'scroll' | 'system'
+  type: 'move' | 'click' | 'scroll' | 'system' | 'mousedown' | 'mouseup'
   x?: number
   y?: number
   button?: 'left' | 'right' | 'middle' | 'back' | 'forward'
@@ -24,6 +25,7 @@ export function Touchpad({
   hasAttemptedConnection,
   isReconnecting,
   mouseSensitivity,
+  heldButton,
   onSendCommand,
   onReconnect
 }: TouchpadProps) {
@@ -34,27 +36,49 @@ export function Touchpad({
   const touchStartTimeRef = useRef(0)
   const touchStartPosRef = useRef({ x: 0, y: 0 })
   const hasMoved = useRef(false)
+  const isMouseButtonDownRef = useRef(false)
+  const activeTouchIdRef = useRef<number | null>(null)
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
     e.preventDefault()
+    
+    // Get the first touch on the touchpad (or the latest if multi-touch)
+    const touch = e.touches[e.touches.length - 1]
+    
+    // Store the touch identifier for tracking this specific touch
+    activeTouchIdRef.current = touch.identifier
+    
     isDraggingRef.current = true
     hasMoved.current = false
-    const touch = e.touches[0]
     lastPosRef.current = { x: touch.clientX, y: touch.clientY }
-    touchStartTimeRef.current = Date.now()
-    touchStartPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }, [])
+    
+    // Only set timing for click detection if no button is held
+    if (!heldButton) {
+      touchStartTimeRef.current = Date.now()
+      touchStartPosRef.current = { x: touch.clientX, y: touch.clientY }
+    }
+  }, [heldButton])
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
     e.preventDefault()
-    if (!isDraggingRef.current) return
+    if (!isDraggingRef.current || activeTouchIdRef.current === null) return
 
-    const touch = e.touches[0]
-    let deltaX = touch.clientX - lastPosRef.current.x
-    let deltaY = touch.clientY - lastPosRef.current.y
+    // Find the specific touch we're tracking by ID
+    let trackedTouch: Touch | null = null
+    for (let i = 0; i < e.touches.length; i++) {
+      if (e.touches[i].identifier === activeTouchIdRef.current) {
+        trackedTouch = e.touches[i]
+        break
+      }
+    }
+    
+    if (!trackedTouch) return
+    
+    let deltaX = trackedTouch.clientX - lastPosRef.current.x
+    let deltaY = trackedTouch.clientY - lastPosRef.current.y
 
     const timeSinceTouchStart = Date.now() - touchStartTimeRef.current
-    if (timeSinceTouchStart < 100) {
+    if (timeSinceTouchStart < 100 && !heldButton) {
       const maxInitialDelta = 2
       deltaX = Math.max(-maxInitialDelta, Math.min(maxInitialDelta, deltaX))
       deltaY = Math.max(-maxInitialDelta, Math.min(maxInitialDelta, deltaY))
@@ -76,23 +100,53 @@ export function Touchpad({
       hasMoved.current = true
     }
 
-    lastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }, [mouseSensitivity, onSendCommand])
+    lastPosRef.current = { x: trackedTouch.clientX, y: trackedTouch.clientY }
+  }, [mouseSensitivity, heldButton, onSendCommand])
 
   const handleTouchEnd = useCallback((e: TouchEvent) => {
     e.preventDefault()
-    isDraggingRef.current = false
-
-    const touchDuration = Date.now() - touchStartTimeRef.current
-    const touch = e.changedTouches[0]
-    const deltaX = Math.abs(touch.clientX - touchStartPosRef.current.x)
-    const deltaY = Math.abs(touch.clientY - touchStartPosRef.current.y)
-    const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
-    if (touchDuration < 300 && totalMovement < 15 && !hasMoved.current) {
-      onSendCommand({ type: 'click', button: 'left' })
+    
+    // Check if our tracked touch was released
+    let trackedTouchStillActive = false
+    if (activeTouchIdRef.current !== null) {
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === activeTouchIdRef.current) {
+          trackedTouchStillActive = true
+          break
+        }
+      }
     }
-  }, [onSendCommand])
+    
+    // If there are still touches remaining and our tracked touch is still active, continue
+    if (e.touches.length > 0 && trackedTouchStillActive) {
+      return
+    }
+    
+    // If our tracked touch ended but others remain, pick up a new one
+    if (e.touches.length > 0) {
+      const newTouch = e.touches[e.touches.length - 1]
+      activeTouchIdRef.current = newTouch.identifier
+      lastPosRef.current = { x: newTouch.clientX, y: newTouch.clientY }
+      return
+    }
+    
+    // No more touches - end dragging
+    isDraggingRef.current = false
+    activeTouchIdRef.current = null
+
+    // Only trigger click if no button is held
+    if (!heldButton) {
+      const touchDuration = Date.now() - touchStartTimeRef.current
+      const touch = e.changedTouches[0]
+      const deltaX = Math.abs(touch.clientX - touchStartPosRef.current.x)
+      const deltaY = Math.abs(touch.clientY - touchStartPosRef.current.y)
+      const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+      if (touchDuration < 300 && totalMovement < 15 && !hasMoved.current) {
+        onSendCommand({ type: 'click', button: 'left' })
+      }
+    }
+  }, [heldButton, onSendCommand])
 
   const handleMouseClick = useCallback(() => {
     if (!pointerLocked && touchpadRef.current) {
@@ -135,7 +189,32 @@ export function Touchpad({
         return
     }
 
-    onSendCommand({ type: 'click', button })
+    isMouseButtonDownRef.current = true
+    onSendCommand({ type: 'mousedown', button })
+  }, [onSendCommand])
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    if (!document.pointerLockElement) return
+
+    e.preventDefault()
+    let button: 'left' | 'right' | 'middle'
+
+    switch (e.button) {
+      case 0:
+        button = 'left'
+        break
+      case 1:
+        button = 'middle'
+        break
+      case 2:
+        button = 'right'
+        break
+      default:
+        return
+    }
+
+    isMouseButtonDownRef.current = false
+    onSendCommand({ type: 'mouseup', button })
   }, [onSendCommand])
 
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -153,8 +232,16 @@ export function Touchpad({
   }, [])
 
   const handlePointerLockChange = useCallback(() => {
-    setPointerLocked(document.pointerLockElement === touchpadRef.current)
-  }, [])
+    const wasLocked = pointerLocked
+    const isLocked = document.pointerLockElement === touchpadRef.current
+    setPointerLocked(isLocked)
+    
+    // Release any held mouse buttons when exiting pointer lock
+    if (wasLocked && !isLocked && isMouseButtonDownRef.current) {
+      onSendCommand({ type: 'mouseup', button: 'left' })
+      isMouseButtonDownRef.current = false
+    }
+  }, [pointerLocked, onSendCommand])
 
   useEffect(() => {
     const touchpad = touchpadRef.current
@@ -178,11 +265,18 @@ export function Touchpad({
   return (
     <div
       ref={touchpadRef}
-      className="flex-1 bg-gray-700 rounded-lg flex items-center justify-center touch-none select-none"
+      className={`flex-1 rounded-lg flex items-center justify-center touch-none select-none ${
+        heldButton 
+          ? heldButton === 'left' ? 'bg-blue-700' 
+            : heldButton === 'middle' ? 'bg-purple-700' 
+            : 'bg-green-700'
+          : 'bg-gray-700'
+      }`}
       style={{ cursor: pointerLocked ? 'none' : 'pointer' }}
       onClick={connected ? handleMouseClick : undefined}
       onMouseMove={connected ? handleMouseMove : undefined}
       onMouseDown={connected ? handleMouseDown : undefined}
+      onMouseUp={connected ? handleMouseUp : undefined}
       onContextMenu={handleContextMenu}
     >
       <div className="text-gray-400 text-center pointer-events-none">
@@ -211,12 +305,13 @@ export function Touchpad({
                 <>
                   <p className="text-xl font-semibold text-green-400 mb-1">Mouse Locked</p>
                   <p className="text-lg">Move mouse to control cursor</p>
+                  <p className="text-lg">Hold and drag to select</p>
                   <p className="text-lg">Press ESC to exit</p>
                 </>
               ) : (
                 <>
-                  <p className="text-lg">Touch and drag to move cursor</p>
-                  <p className="text-lg mt-1">Or click to lock mouse</p>
+                  <p className="text-lg">Touch: Tap to click, hold button + swipe to drag</p>
+                  <p className="text-lg mt-1">Mouse: Click to lock</p>
                 </>
               )}
             </>

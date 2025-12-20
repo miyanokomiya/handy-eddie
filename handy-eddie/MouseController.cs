@@ -85,6 +85,68 @@ namespace handy_eddie
             mouse_event(upFlag, 0, 0, dwData, 0);
         }
 
+        public void MouseDown(string button)
+        {
+            uint downFlag = 0;
+            uint dwData = 0;
+
+            switch (button.ToLower())
+            {
+                case "left":
+                    downFlag = MOUSEEVENTF_LEFTDOWN;
+                    break;
+                case "right":
+                    downFlag = MOUSEEVENTF_RIGHTDOWN;
+                    break;
+                case "middle":
+                    downFlag = MOUSEEVENTF_MIDDLEDOWN;
+                    break;
+                case "back":
+                    downFlag = MOUSEEVENTF_XDOWN;
+                    dwData = XBUTTON1;
+                    break;
+                case "forward":
+                    downFlag = MOUSEEVENTF_XDOWN;
+                    dwData = XBUTTON2;
+                    break;
+                default:
+                    return;
+            }
+
+            mouse_event(downFlag, 0, 0, dwData, 0);
+        }
+
+        public void MouseUp(string button)
+        {
+            uint upFlag = 0;
+            uint dwData = 0;
+
+            switch (button.ToLower())
+            {
+                case "left":
+                    upFlag = MOUSEEVENTF_LEFTUP;
+                    break;
+                case "right":
+                    upFlag = MOUSEEVENTF_RIGHTUP;
+                    break;
+                case "middle":
+                    upFlag = MOUSEEVENTF_MIDDLEUP;
+                    break;
+                case "back":
+                    upFlag = MOUSEEVENTF_XUP;
+                    dwData = XBUTTON1;
+                    break;
+                case "forward":
+                    upFlag = MOUSEEVENTF_XUP;
+                    dwData = XBUTTON2;
+                    break;
+                default:
+                    return;
+            }
+
+            mouse_event(upFlag, 0, 0, dwData, 0);
+        }
+
         public void Scroll(double deltaX, double deltaY)
         {
             if (deltaY != 0)

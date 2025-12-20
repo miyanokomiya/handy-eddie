@@ -322,6 +322,30 @@ namespace handy_eddie
                         }
                         break;
 
+                    case "mousedown":
+                        if (root.TryGetProperty("button", out var downButtonElement))
+                        {
+                            var button = downButtonElement.GetString() ?? "left";
+                            mouseController.MouseDown(button);
+                            if (debugLogging)
+                            {
+                                LogMessage?.Invoke(this, $"Mouse down: {button}");
+                            }
+                        }
+                        break;
+
+                    case "mouseup":
+                        if (root.TryGetProperty("button", out var upButtonElement))
+                        {
+                            var button = upButtonElement.GetString() ?? "left";
+                            mouseController.MouseUp(button);
+                            if (debugLogging)
+                            {
+                                LogMessage?.Invoke(this, $"Mouse up: {button}");
+                            }
+                        }
+                        break;
+
                     case "scroll":
                         if (root.TryGetProperty("deltaX", out var deltaXElement) &&
                             root.TryGetProperty("deltaY", out var deltaYElement))
