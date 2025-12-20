@@ -8,6 +8,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ClientAppDir>$(MSBuildProjectDirectory)\client</ClientAppDir>
+    <ClientDistDir>$(MSBuildProjectDirectory)\wwwroot</ClientDistDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,5 +25,22 @@
   <ItemGroup>
     <None Include=".gitignore" />
   </ItemGroup>
+
+  <!-- Install npm packages if node_modules doesn't exist -->
+  <Target Name="CheckNodeModules" BeforeTargets="PreBuildEvent">
+    <Exec Command="if not exist &quot;$(ClientAppDir)\node_modules&quot; npm install" WorkingDirectory="$(ClientAppDir)" />
+  </Target>
+
+  <!-- Build the client app before building the .NET project -->
+  <Target Name="BuildClientApp" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="Building client application..." />
+    <Exec Command="npm run build" WorkingDirectory="$(ClientAppDir)" />
+    <Message Importance="high" Text="Client application built successfully." />
+  </Target>
+
+  <!-- Clean client build output when cleaning the project -->
+  <Target Name="CleanClientApp" BeforeTargets="CoreClean">
+    <RemoveDir Directories="$(ClientDistDir)" />
+  </Target>
 
 </Project>
