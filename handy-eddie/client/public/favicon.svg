@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Shadow on ground -->
+  <ellipse cx="128" cy="220" rx="80" ry="20" fill="#1a1a1a" opacity="0.3"/>
+  
+  <!-- Ghost body rising from shadow -->
+  <g id="ghost">
+    <!-- Main ghost body -->
+    <path d="M 128 210 
+             C 90 210, 70 190, 70 150
+             C 70 110, 70 80, 70 60
+             C 70 30, 95 10, 128 10
+             C 161 10, 186 30, 186 60
+             C 186 80, 186 110, 186 150
+             C 186 190, 166 210, 128 210 Z" 
+          fill="url(#ghostGradient)" opacity="0.9"/>
+    
+    <!-- Ghost bottom wavy edge -->
+    <path d="M 70 150
+             C 70 170, 80 185, 90 195
+             L 90 210
+             L 105 195
+             L 120 210
+             L 135 195
+             L 150 210
+             L 165 195
+             L 166 210
+             C 166 210, 175 195, 186 175
+             C 186 190, 166 210, 128 210
+             C 90 210, 70 190, 70 150 Z"
+          fill="url(#ghostGradient)" opacity="0.85"/>
+    
+    <!-- Left eye -->
+    <ellipse cx="105" cy="70" rx="12" ry="18" fill="#2d2d2d" opacity="0.7"/>
+    <ellipse cx="108" cy="75" rx="6" ry="9" fill="#1a1a1a" opacity="0.9"/>
+    
+    <!-- Right eye -->
+    <ellipse cx="151" cy="70" rx="12" ry="18" fill="#2d2d2d" opacity="0.7"/>
+    <ellipse cx="154" cy="75" rx="6" ry="9" fill="#1a1a1a" opacity="0.9"/>
+    
+    <!-- Friendly smile -->
+    <path d="M 105 100 Q 128 110, 151 100" 
+          stroke="#2d2d2d" stroke-width="4" fill="none" 
+          stroke-linecap="round" opacity="0.6"/>
+    
+    <!-- Ethereal wisps -->
+    <path d="M 75 120 Q 60 115, 55 125 Q 50 135, 58 140" 
+          stroke="url(#wispGradient)" stroke-width="3" fill="none" 
+          stroke-linecap="round" opacity="0.5"/>
+    <path d="M 181 120 Q 196 115, 201 125 Q 206 135, 198 140" 
+          stroke="url(#wispGradient)" stroke-width="3" fill="none" 
+          stroke-linecap="round" opacity="0.5"/>
+    
+    <!-- Hand/arm reaching out (left) -->
+    <ellipse cx="60" cy="110" rx="15" ry="8" fill="url(#ghostGradient)" opacity="0.8" transform="rotate(-20 60 110)"/>
+    <ellipse cx="50" cy="120" rx="12" ry="6" fill="url(#ghostGradient)" opacity="0.7" transform="rotate(-30 50 120)"/>
+    
+    <!-- Hand/arm reaching out (right) -->
+    <ellipse cx="196" cy="110" rx="15" ry="8" fill="url(#ghostGradient)" opacity="0.8" transform="rotate(20 196 110)"/>
+    <ellipse cx="206" cy="120" rx="12" ry="6" fill="url(#ghostGradient)" opacity="0.7" transform="rotate(30 206 120)"/>
+  </g>
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="ghostGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3a3a3a;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#2a2a2a;stop-opacity:0.85" />
+    </linearGradient>
+    
+    <linearGradient id="wispGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3a3a3a;stop-opacity:0.2" />
+      <stop offset="50%" style="stop-color:#4a4a4a;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#3a3a3a;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -36,6 +36,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             pictureBoxQR = new PictureBox();
             textBoxLog = new TextBox();
             labelUrl = new Label();
@@ -142,6 +143,7 @@
             Controls.Add(labelUrl);
             Controls.Add(textBoxLog);
             Controls.Add(pictureBoxQR);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             Text = "Handy Eddie - Mobile Mouse Controller";
             FormClosing += Form1_FormClosing;
