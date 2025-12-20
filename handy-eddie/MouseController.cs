@@ -28,6 +28,11 @@ namespace handy_eddie
         private const uint MOUSEEVENTF_MIDDLEUP = 0x0040;
         private const uint MOUSEEVENTF_WHEEL = 0x0800;
         private const uint MOUSEEVENTF_HWHEEL = 0x01000;
+        private const uint MOUSEEVENTF_XDOWN = 0x0080;
+        private const uint MOUSEEVENTF_XUP = 0x0100;
+
+        private const uint XBUTTON1 = 0x0001;
+        private const uint XBUTTON2 = 0x0002;
 
         public void Move(int x, int y)
         {
@@ -46,6 +51,7 @@ namespace handy_eddie
         {
             uint downFlag = 0;
             uint upFlag = 0;
+            uint dwData = 0;
 
             switch (button.ToLower())
             {
@@ -61,12 +67,22 @@ namespace handy_eddie
                     downFlag = MOUSEEVENTF_MIDDLEDOWN;
                     upFlag = MOUSEEVENTF_MIDDLEUP;
                     break;
+                case "back":
+                    downFlag = MOUSEEVENTF_XDOWN;
+                    upFlag = MOUSEEVENTF_XUP;
+                    dwData = XBUTTON1;
+                    break;
+                case "forward":
+                    downFlag = MOUSEEVENTF_XDOWN;
+                    upFlag = MOUSEEVENTF_XUP;
+                    dwData = XBUTTON2;
+                    break;
                 default:
                     return;
             }
 
-            mouse_event(downFlag, 0, 0, 0, 0);
-            mouse_event(upFlag, 0, 0, 0, 0);
+            mouse_event(downFlag, 0, 0, dwData, 0);
+            mouse_event(upFlag, 0, 0, dwData, 0);
         }
 
         public void Scroll(double deltaX, double deltaY)

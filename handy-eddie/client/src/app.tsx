@@ -11,7 +11,7 @@ interface MouseAction {
   type: 'move' | 'click' | 'scroll' | 'system'
   x?: number
   y?: number
-  button?: 'left' | 'right' | 'middle'
+  button?: 'left' | 'right' | 'middle' | 'back' | 'forward'
   deltaX?: number
   deltaY?: number
   command?: string
