@@ -6,7 +6,7 @@ import { Touchpad } from './Touchpad'
 import { VerticalScrollBar } from './VerticalScrollBar'
 import { HorizontalScrollBar } from './HorizontalScrollBar'
 import { MouseButtons } from './MouseButtons'
-import { TextInput } from './TextInput'
+import { TextInput, TextInputHandle } from './TextInput'
 
 interface MouseAction {
   type: 'move' | 'click' | 'scroll' | 'system' | 'keyboard'
@@ -48,6 +48,7 @@ export function App() {
   })
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<number | null>(null)
+  const textInputRef = useRef<TextInputHandle>(null)
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
@@ -133,6 +134,11 @@ export function App() {
     } else {
       console.log(action)
     }
+    
+    // Blur the text input when any command is sent (except keyboard commands)
+    if (action.type !== 'keyboard') {
+      textInputRef.current?.blur()
+    }
   }
 
   const sendSystemCommand = (command: string) => {
@@ -148,7 +154,7 @@ export function App() {
   }
 
   return (
-    <div className="flex flex-col h-svh bg-gray-900 text-white">
+    <div className="flex flex-col h-dvh bg-gray-900 text-white">
       <Header
         connected={connected}
         isReconnecting={isReconnecting}
@@ -187,7 +193,7 @@ export function App() {
 
         <MouseButtons onSendCommand={sendCommand} />
         
-        <TextInput onSendCommand={sendCommand} connected={connected} />
+        <TextInput ref={textInputRef} onSendCommand={sendCommand} connected={connected} />
       </div>
 
       <Settings
