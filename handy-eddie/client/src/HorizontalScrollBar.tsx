@@ -18,6 +18,7 @@ export function HorizontalScrollBar({ scrollSensitivity, onSendCommand }: Horizo
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     isScrollingRef.current = true
     const touch = e.touches[0]
     scrollLastPosRef.current = { x: touch.clientX, y: touch.clientY }
@@ -25,6 +26,7 @@ export function HorizontalScrollBar({ scrollSensitivity, onSendCommand }: Horizo
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (!isScrollingRef.current) return
 
     const touch = e.touches[0]
@@ -45,6 +47,7 @@ export function HorizontalScrollBar({ scrollSensitivity, onSendCommand }: Horizo
 
   const handleTouchEnd = useCallback((e: TouchEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     isScrollingRef.current = false
   }, [])
 
@@ -54,11 +57,13 @@ export function HorizontalScrollBar({ scrollSensitivity, onSendCommand }: Horizo
       scrollBar.addEventListener('touchstart', handleTouchStart, { passive: false })
       scrollBar.addEventListener('touchmove', handleTouchMove, { passive: false })
       scrollBar.addEventListener('touchend', handleTouchEnd, { passive: false })
+      scrollBar.addEventListener('touchcancel', handleTouchEnd, { passive: false })
 
       return () => {
         scrollBar.removeEventListener('touchstart', handleTouchStart)
         scrollBar.removeEventListener('touchmove', handleTouchMove)
         scrollBar.removeEventListener('touchend', handleTouchEnd)
+        scrollBar.removeEventListener('touchcancel', handleTouchEnd)
       }
     }
   }, [handleTouchStart, handleTouchMove, handleTouchEnd])
