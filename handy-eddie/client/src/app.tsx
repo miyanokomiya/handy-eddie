@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks'
+import { Header } from './Header'
 import { Settings } from './Settings'
 import { SystemCommands } from './SystemCommands'
 import { Touchpad } from './Touchpad'
@@ -146,37 +147,16 @@ export function App() {
 
   return (
     <div className="flex flex-col h-svh bg-gray-900 text-white">
-      {/* Header */}
-      <div className="bg-gray-800 px-4 py-1 shadow-lg">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setOpenDialog('system')}
-            className="text-gray-400 hover:text-white transition-colors p-1"
-            title="System Commands"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </button>
-          <div className={`text-center text-lg mt-1 ${connected ? 'text-green-400' : isReconnecting ? 'text-yellow-400' : 'text-red-400'}`}>
-            {status}
-          </div>
-          <button
-            onClick={() => setOpenDialog('settings')}
-            className="text-gray-400 hover:text-white transition-colors p-1"
-            title="Settings"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      <Header
+        connected={connected}
+        isReconnecting={isReconnecting}
+        status={status}
+        onOpenSystemDialog={() => setOpenDialog('system')}
+        onOpenSettingsDialog={() => setOpenDialog('settings')}
+      />
 
       {/* Main Content Area with Touchpad and Scroll Bars */}
       <div className="flex-1 flex m-2 gap-2">
-        {/* Touchpad Area */}
         <Touchpad
           connected={connected}
           hasAttemptedConnection={hasAttemptedConnection}
@@ -186,7 +166,6 @@ export function App() {
           onReconnect={handleReconnect}
         />
 
-        {/* Vertical Scroll Bar - Only on touch devices */}
         {isTouchDevice && (
           <VerticalScrollBar
             scrollSensitivity={scrollSensitivity}
@@ -195,7 +174,7 @@ export function App() {
         )}
       </div>
 
-      {/* Horizontal Scroll Bar - Only on touch devices */}
+      {/* Horizontal Scroll Bar and Button Controls */}
       <div className="px-2 pb-2">
         {isTouchDevice && (
           <HorizontalScrollBar
@@ -204,11 +183,9 @@ export function App() {
           />
         )}
 
-        {/* Button Controls */}
         <MouseButtons onSendCommand={sendCommand} />
       </div>
 
-      {/* Settings Panel */}
       <Settings
         isOpen={openDialog === 'settings'}
         onClose={() => setOpenDialog('none')}
@@ -220,7 +197,6 @@ export function App() {
         defaultScrollSensitivity={DEFAULT_SENSITIVITY.SCROLL}
       />
 
-      {/* System Commands Panel */}
       <SystemCommands
         isOpen={openDialog === 'system'}
         onClose={() => setOpenDialog('none')}
