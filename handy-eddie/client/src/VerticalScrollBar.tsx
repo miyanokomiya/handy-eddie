@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'preact/hooks'
+import { useRef, useEffect, useCallback } from 'preact/hooks'
 
 interface VerticalScrollBarProps {
   scrollSensitivity: number
@@ -16,14 +16,14 @@ export function VerticalScrollBar({ scrollSensitivity, onSendCommand }: Vertical
   const isScrollingRef = useRef(false)
   const scrollLastPosRef = useRef({ x: 0, y: 0 })
 
-  const handleTouchStart = (e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     e.preventDefault()
     isScrollingRef.current = true
     const touch = e.touches[0]
     scrollLastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
+  }, [])
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     e.preventDefault()
     if (!isScrollingRef.current) return
 
@@ -41,12 +41,12 @@ export function VerticalScrollBar({ scrollSensitivity, onSendCommand }: Vertical
     }
 
     scrollLastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
+  }, [scrollSensitivity, onSendCommand])
 
-  const handleTouchEnd = (e: TouchEvent) => {
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
     e.preventDefault()
     isScrollingRef.current = false
-  }
+  }, [])
 
   useEffect(() => {
     const scrollBar = scrollBarRef.current
@@ -61,7 +61,7 @@ export function VerticalScrollBar({ scrollSensitivity, onSendCommand }: Vertical
         scrollBar.removeEventListener('touchend', handleTouchEnd)
       }
     }
-  }, [scrollSensitivity])
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd])
 
   return (
     <div

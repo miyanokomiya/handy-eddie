@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'preact/hooks'
+import { useRef, useEffect, useState, useCallback } from 'preact/hooks'
 
 interface TouchpadProps {
   connected: boolean
@@ -35,7 +35,7 @@ export function Touchpad({
   const touchStartPosRef = useRef({ x: 0, y: 0 })
   const hasMoved = useRef(false)
 
-  const handleTouchStart = (e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     e.preventDefault()
     isDraggingRef.current = true
     hasMoved.current = false
@@ -43,9 +43,9 @@ export function Touchpad({
     lastPosRef.current = { x: touch.clientX, y: touch.clientY }
     touchStartTimeRef.current = Date.now()
     touchStartPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
+  }, [])
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     e.preventDefault()
     if (!isDraggingRef.current) return
 
@@ -77,9 +77,9 @@ export function Touchpad({
     }
 
     lastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
+  }, [mouseSensitivity, onSendCommand])
 
-  const handleTouchEnd = (e: TouchEvent) => {
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
     e.preventDefault()
     isDraggingRef.current = false
 
@@ -92,15 +92,15 @@ export function Touchpad({
     if (touchDuration < 300 && totalMovement < 15 && !hasMoved.current) {
       onSendCommand({ type: 'click', button: 'left' })
     }
-  }
+  }, [onSendCommand])
 
-  const handleMouseClick = () => {
+  const handleMouseClick = useCallback(() => {
     if (!pointerLocked && touchpadRef.current) {
       touchpadRef.current.requestPointerLock()
     }
-  }
+  }, [pointerLocked])
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!document.pointerLockElement) return
 
     const moveX = Math.round(e.movementX * mouseSensitivity)
@@ -113,9 +113,9 @@ export function Touchpad({
         y: moveY
       })
     }
-  }
+  }, [mouseSensitivity, onSendCommand])
 
-  const handleMouseDown = (e: MouseEvent) => {
+  const handleMouseDown = useCallback((e: MouseEvent) => {
     if (!document.pointerLockElement) return
 
     e.preventDefault()
@@ -136,9 +136,9 @@ export function Touchpad({
     }
 
     onSendCommand({ type: 'click', button })
-  }
+  }, [onSendCommand])
 
-  const handleWheel = (e: WheelEvent) => {
+  const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault()
 
     onSendCommand({
@@ -146,11 +146,15 @@ export function Touchpad({
       deltaX: e.deltaX,
       deltaY: e.deltaY
     })
-  }
+  }, [onSendCommand])
 
-  const handlePointerLockChange = () => {
+  const handleContextMenu = useCallback((e: Event) => {
+    e.preventDefault()
+  }, [])
+
+  const handlePointerLockChange = useCallback(() => {
     setPointerLocked(document.pointerLockElement === touchpadRef.current)
-  }
+  }, [])
 
   useEffect(() => {
     const touchpad = touchpadRef.current
@@ -158,32 +162,28 @@ export function Touchpad({
       touchpad.addEventListener('touchstart', handleTouchStart, { passive: false })
       touchpad.addEventListener('touchmove', handleTouchMove, { passive: false })
       touchpad.addEventListener('touchend', handleTouchEnd, { passive: false })
-      touchpad.addEventListener('click', handleMouseClick as any)
-      touchpad.addEventListener('mousemove', handleMouseMove as any)
-      touchpad.addEventListener('mousedown', handleMouseDown as any)
-      touchpad.addEventListener('wheel', handleWheel as any, { passive: false })
-      touchpad.addEventListener('contextmenu', (e) => e.preventDefault())
+      touchpad.addEventListener('wheel', handleWheel, { passive: false })
       document.addEventListener('pointerlockchange', handlePointerLockChange)
 
       return () => {
         touchpad.removeEventListener('touchstart', handleTouchStart)
         touchpad.removeEventListener('touchmove', handleTouchMove)
         touchpad.removeEventListener('touchend', handleTouchEnd)
-        touchpad.removeEventListener('click', handleMouseClick as any)
-        touchpad.removeEventListener('mousemove', handleMouseMove as any)
-        touchpad.removeEventListener('mousedown', handleMouseDown as any)
-        touchpad.removeEventListener('wheel', handleWheel as any)
-        touchpad.removeEventListener('contextmenu', (e) => e.preventDefault())
+        touchpad.removeEventListener('wheel', handleWheel)
         document.removeEventListener('pointerlockchange', handlePointerLockChange)
       }
     }
-  }, [mouseSensitivity])
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handleContextMenu, handlePointerLockChange])
 
   return (
     <div
       ref={touchpadRef}
       className="flex-1 bg-gray-700 rounded-lg flex items-center justify-center touch-none select-none"
       style={{ cursor: pointerLocked ? 'none' : 'pointer' }}
+      onClick={handleMouseClick}
+      onMouseMove={handleMouseMove}
+      onMouseDown={handleMouseDown}
+      onContextMenu={handleContextMenu}
     >
       <div className="text-gray-400 text-center pointer-events-none">
         {!connected && hasAttemptedConnection && !pointerLocked && (
