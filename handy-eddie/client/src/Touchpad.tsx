@@ -158,31 +158,31 @@ export function Touchpad({
 
   useEffect(() => {
     const touchpad = touchpadRef.current
-    if (touchpad) {
-      touchpad.addEventListener('touchstart', handleTouchStart, { passive: false })
-      touchpad.addEventListener('touchmove', handleTouchMove, { passive: false })
-      touchpad.addEventListener('touchend', handleTouchEnd, { passive: false })
-      touchpad.addEventListener('wheel', handleWheel, { passive: false })
-      document.addEventListener('pointerlockchange', handlePointerLockChange)
+    if (!touchpad || !connected) return
 
-      return () => {
-        touchpad.removeEventListener('touchstart', handleTouchStart)
-        touchpad.removeEventListener('touchmove', handleTouchMove)
-        touchpad.removeEventListener('touchend', handleTouchEnd)
-        touchpad.removeEventListener('wheel', handleWheel)
-        document.removeEventListener('pointerlockchange', handlePointerLockChange)
-      }
+    touchpad.addEventListener('touchstart', handleTouchStart, { passive: false })
+    touchpad.addEventListener('touchmove', handleTouchMove, { passive: false })
+    touchpad.addEventListener('touchend', handleTouchEnd, { passive: false })
+    touchpad.addEventListener('wheel', handleWheel, { passive: false })
+    document.addEventListener('pointerlockchange', handlePointerLockChange)
+
+    return () => {
+      touchpad.removeEventListener('touchstart', handleTouchStart)
+      touchpad.removeEventListener('touchmove', handleTouchMove)
+      touchpad.removeEventListener('touchend', handleTouchEnd)
+      touchpad.removeEventListener('wheel', handleWheel)
+      document.removeEventListener('pointerlockchange', handlePointerLockChange)
     }
-  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handleContextMenu, handlePointerLockChange])
+  }, [connected, handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handlePointerLockChange])
 
   return (
     <div
       ref={touchpadRef}
       className="flex-1 bg-gray-700 rounded-lg flex items-center justify-center touch-none select-none"
       style={{ cursor: pointerLocked ? 'none' : 'pointer' }}
-      onClick={handleMouseClick}
-      onMouseMove={handleMouseMove}
-      onMouseDown={handleMouseDown}
+      onClick={connected ? handleMouseClick : undefined}
+      onMouseMove={connected ? handleMouseMove : undefined}
+      onMouseDown={connected ? handleMouseDown : undefined}
       onContextMenu={handleContextMenu}
     >
       <div className="text-gray-400 text-center pointer-events-none">
