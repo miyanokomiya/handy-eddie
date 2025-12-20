@@ -6,6 +6,8 @@ A web server and mobile web client that allows you to control your Windows mouse
 
 - Control Windows mouse pointer from mobile device
 - Send keyboard text input to the server PC
+- Media controls (play/pause, volume, track navigation)
+- Arrow key controls for video seeking and navigation
 - Portrait-first responsive UI
 - WebSocket communication with human-readable JSON protocol
 - QR code for easy connection
@@ -13,6 +15,14 @@ A web server and mobile web client that allows you to control your Windows mouse
 - Left, right, middle, back, and forward click buttons
 - Vertical and horizontal scrolling
 - System commands (sleep, shutdown, restart, lock)
+- Customizable sensitivity settings
+
+## Documentation
+
+- **[Quick Start Guide](documents/QUICKSTART.md)** - Get started quickly
+- **[User Guide - Controls](documents/USER_GUIDE_CONTROLS.md)** - Learn how to use media and arrow controls
+- **[Project Structure](documents/PROJECT-STRUCTURE.md)** - Understand the codebase
+- **[Implementation Details](documents/VIDEO_CONTROLS_IMPLEMENTATION.md)** - Technical documentation
 
 ## Setup Instructions
 

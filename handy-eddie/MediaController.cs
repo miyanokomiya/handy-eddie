@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace handy_eddie
 {
-    public class KeyboardController
+    public class MediaController
     {
         [DllImport("user32.dll")]
         private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
@@ -55,52 +55,39 @@ namespace handy_eddie
         }
 
         private const uint INPUT_KEYBOARD = 1;
-        private const uint KEYEVENTF_UNICODE = 0x0004;
         private const uint KEYEVENTF_KEYUP = 0x0002;
-        private const uint KEYEVENTF_SCANCODE = 0x0008;
         private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
 
-        private const ushort VK_RETURN = 0x0D;
-        private const ushort VK_LEFT = 0x25;
-        private const ushort VK_UP = 0x26;
-        private const ushort VK_RIGHT = 0x27;
-        private const ushort VK_DOWN = 0x28;
+        // Media control virtual key codes
+        private const ushort VK_MEDIA_PLAY_PAUSE = 0xB3;
+        private const ushort VK_MEDIA_STOP = 0xB2;
+        private const ushort VK_MEDIA_PREV_TRACK = 0xB1;
+        private const ushort VK_MEDIA_NEXT_TRACK = 0xB0;
+        private const ushort VK_VOLUME_MUTE = 0xAD;
+        private const ushort VK_VOLUME_DOWN = 0xAE;
+        private const ushort VK_VOLUME_UP = 0xAF;
 
-        public void SendText(string text)
+        public void ExecuteMediaCommand(string command)
         {
-            if (string.IsNullOrEmpty(text))
-                return;
-
-            foreach (char c in text)
+            ushort virtualKey = command.ToLower() switch
             {
-                SendChar(c);
-            }
-        }
-
-        public void SendEnter()
-        {
-            SendKey(VK_RETURN);
-        }
-
-        public void SendSpecialKey(string key)
-        {
-            ushort virtualKey = key switch
-            {
-                "ArrowLeft" => VK_LEFT,
-                "ArrowUp" => VK_UP,
-                "ArrowRight" => VK_RIGHT,
-                "ArrowDown" => VK_DOWN,
-                "Enter" => VK_RETURN,
+                "playpause" => VK_MEDIA_PLAY_PAUSE,
+                "stop" => VK_MEDIA_STOP,
+                "previous" => VK_MEDIA_PREV_TRACK,
+                "next" => VK_MEDIA_NEXT_TRACK,
+                "mute" => VK_VOLUME_MUTE,
+                "volumedown" => VK_VOLUME_DOWN,
+                "volumeup" => VK_VOLUME_UP,
                 _ => 0
             };
 
             if (virtualKey != 0)
             {
-                SendKey(virtualKey);
+                SendMediaKey(virtualKey);
             }
         }
 
-        private void SendKey(ushort virtualKey)
+        private void SendMediaKey(ushort virtualKey)
         {
             INPUT[] inputs = new INPUT[2];
 
@@ -114,7 +101,7 @@ namespace handy_eddie
                     {
                         wVk = virtualKey,
                         wScan = 0,
-                        dwFlags = 0,
+                        dwFlags = KEYEVENTF_EXTENDEDKEY,
                         time = 0,
                         dwExtraInfo = IntPtr.Zero
                     }
@@ -131,48 +118,7 @@ namespace handy_eddie
                     {
                         wVk = virtualKey,
                         wScan = 0,
-                        dwFlags = KEYEVENTF_KEYUP,
-                        time = 0,
-                        dwExtraInfo = IntPtr.Zero
-                    }
-                }
-            };
-
-            SendInput(2, inputs, Marshal.SizeOf(typeof(INPUT)));
-        }
-
-        private void SendChar(char c)
-        {
-            INPUT[] inputs = new INPUT[2];
-
-            // Key down
-            inputs[0] = new INPUT
-            {
-                type = INPUT_KEYBOARD,
-                u = new INPUTUNION
-                {
-                    ki = new KEYBDINPUT
-                    {
-                        wVk = 0,
-                        wScan = c,
-                        dwFlags = KEYEVENTF_UNICODE,
-                        time = 0,
-                        dwExtraInfo = IntPtr.Zero
-                    }
-                }
-            };
-
-            // Key up
-            inputs[1] = new INPUT
-            {
-                type = INPUT_KEYBOARD,
-                u = new INPUTUNION
-                {
-                    ki = new KEYBDINPUT
-                    {
-                        wVk = 0,
-                        wScan = c,
-                        dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP,
+                        dwFlags = KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP,
                         time = 0,
                         dwExtraInfo = IntPtr.Zero
                     }

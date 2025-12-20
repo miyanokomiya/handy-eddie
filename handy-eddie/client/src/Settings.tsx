@@ -7,6 +7,10 @@ interface SettingsProps {
   onScrollSensitivityChange: (value: number) => void
   defaultMouseSensitivity?: number
   defaultScrollSensitivity?: number
+  showVideoControls: boolean
+  onShowVideoControlsChange: (value: boolean) => void
+  showArrowControls: boolean
+  onShowArrowControlsChange: (value: boolean) => void
 }
 
 export function Settings({
@@ -17,7 +21,11 @@ export function Settings({
   scrollSensitivity,
   onScrollSensitivityChange,
   defaultMouseSensitivity = 2.5,
-  defaultScrollSensitivity = 3
+  defaultScrollSensitivity = 3,
+  showVideoControls,
+  onShowVideoControlsChange,
+  showArrowControls,
+  onShowArrowControlsChange
 }: SettingsProps) {
   if (!isOpen) return null
 
@@ -42,6 +50,42 @@ export function Settings({
             </svg>
           </button>
         </div>
+
+        {/* Control Visibility Settings */}
+        <div className="mb-6 space-y-3">
+          <h3 className="text-white text-sm font-medium mb-3">Control Panels</h3>
+          
+          {/* Video Controls Toggle */}
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="text-white text-sm">Media Controls</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={showVideoControls}
+                onChange={(e) => onShowVideoControlsChange((e.target as HTMLInputElement).checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </div>
+          </label>
+
+          {/* Arrow Controls Toggle */}
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="text-white text-sm">Arrow Key Controls</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={showArrowControls}
+                onChange={(e) => onShowArrowControlsChange((e.target as HTMLInputElement).checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </div>
+          </label>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-700 my-6"></div>
 
         {/* Mouse Sensitivity Setting */}
         <div className="mb-6">

@@ -13,6 +13,7 @@ namespace handy_eddie
         private readonly MouseController mouseController;
         private readonly SystemController systemController;
         private readonly KeyboardController keyboardController;
+        private readonly MediaController mediaController;
         private HttpListener? httpListener;
         private bool isRunning;
         private bool debugLogging = true;
@@ -25,6 +26,7 @@ namespace handy_eddie
             this.mouseController = new MouseController();
             this.systemController = new SystemController();
             this.keyboardController = new KeyboardController();
+            this.mediaController = new MediaController();
             this.systemController.LogMessage += (s, msg) => LogMessage?.Invoke(this, msg);
         }
 
@@ -319,6 +321,24 @@ namespace handy_eddie
                                     LogMessage?.Invoke(this, $"Keyboard: {text}{enterSuffix}");
                                 }
                             }
+                        }
+                        else if (root.TryGetProperty("key", out var keyElement))
+                        {
+                            var key = keyElement.GetString() ?? "";
+                            keyboardController.SendSpecialKey(key);
+                            if (debugLogging)
+                            {
+                                LogMessage?.Invoke(this, $"Keyboard: {key}");
+                            }
+                        }
+                        break;
+
+                    case "media":
+                        if (root.TryGetProperty("command", out var mediaCommandElement))
+                        {
+                            var mediaCommand = mediaCommandElement.GetString() ?? "";
+                            LogMessage?.Invoke(this, $"Media command: {mediaCommand}");
+                            mediaController.ExecuteMediaCommand(mediaCommand);
                         }
                         break;
                 }

@@ -7,9 +7,11 @@ import { VerticalScrollBar } from './VerticalScrollBar'
 import { HorizontalScrollBar } from './HorizontalScrollBar'
 import { MouseButtons } from './MouseButtons'
 import { TextInput, TextInputHandle } from './TextInput'
+import { VideoControls } from './VideoControls'
+import { ArrowControls } from './ArrowControls'
 
 interface MouseAction {
-  type: 'move' | 'click' | 'scroll' | 'system' | 'keyboard'
+  type: 'move' | 'click' | 'scroll' | 'system' | 'keyboard' | 'media'
   x?: number
   y?: number
   button?: 'left' | 'right' | 'middle' | 'back' | 'forward'
@@ -17,11 +19,14 @@ interface MouseAction {
   deltaY?: number
   command?: string
   text?: string
+  key?: string
 }
 
 const STORAGE_KEYS = {
   MOUSE_SENSITIVITY: 'handy-eddie_mouseSensitivity',
-  SCROLL_SENSITIVITY: 'handy-eddie_scrollSensitivity'
+  SCROLL_SENSITIVITY: 'handy-eddie_scrollSensitivity',
+  SHOW_VIDEO_CONTROLS: 'handy-eddie_showVideoControls',
+  SHOW_ARROW_CONTROLS: 'handy-eddie_showArrowControls'
 } as const
 
 const DEFAULT_SENSITIVITY = {
@@ -46,6 +51,14 @@ export function App() {
     const saved = localStorage.getItem(STORAGE_KEYS.SCROLL_SENSITIVITY)
     return saved ? parseFloat(saved) : DEFAULT_SENSITIVITY.SCROLL
   })
+  const [showVideoControls, setShowVideoControls] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_VIDEO_CONTROLS)
+    return saved ? saved === 'true' : true
+  })
+  const [showArrowControls, setShowArrowControls] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_ARROW_CONTROLS)
+    return saved ? saved === 'true' : false
+  })
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<number | null>(null)
   const textInputRef = useRef<TextInputHandle>(null)
@@ -58,6 +71,14 @@ export function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SCROLL_SENSITIVITY, scrollSensitivity.toString())
   }, [scrollSensitivity])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SHOW_VIDEO_CONTROLS, showVideoControls.toString())
+  }, [showVideoControls])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SHOW_ARROW_CONTROLS, showArrowControls.toString())
+  }, [showArrowControls])
 
   const connectWebSocket = () => {
     if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) return
@@ -191,6 +212,14 @@ export function App() {
           />
         )}
 
+        {showVideoControls && (
+          <VideoControls onSendCommand={sendCommand} connected={connected} />
+        )}
+
+        {showArrowControls && (
+          <ArrowControls onSendCommand={sendCommand} connected={connected} />
+        )}
+
         <MouseButtons onSendCommand={sendCommand} />
         
         <TextInput ref={textInputRef} onSendCommand={sendCommand} connected={connected} />
@@ -205,6 +234,10 @@ export function App() {
         onScrollSensitivityChange={setScrollSensitivity}
         defaultMouseSensitivity={DEFAULT_SENSITIVITY.MOUSE}
         defaultScrollSensitivity={DEFAULT_SENSITIVITY.SCROLL}
+        showVideoControls={showVideoControls}
+        onShowVideoControlsChange={setShowVideoControls}
+        showArrowControls={showArrowControls}
+        onShowArrowControlsChange={setShowArrowControls}
       />
 
       <SystemCommands
