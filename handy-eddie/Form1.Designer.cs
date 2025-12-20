@@ -8,7 +8,8 @@
         private System.ComponentModel.IContainer components = null;
         private PictureBox pictureBoxQR;
         private TextBox textBoxLog;
-        private Label labelUrl;
+        private Label labelUrlPrefix;
+        private TextBox textBoxUrl;
         private Button buttonStart;
         private Button buttonStop;
         private NumericUpDown numericUpDownPort;
@@ -41,7 +42,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             pictureBoxQR = new PictureBox();
             textBoxLog = new TextBox();
-            labelUrl = new Label();
+            labelUrlPrefix = new Label();
+            textBoxUrl = new TextBox();
             buttonStart = new Button();
             buttonStop = new Button();
             labelPort = new Label();
@@ -72,23 +74,32 @@
             textBoxLog.ScrollBars = ScrollBars.Vertical;
             textBoxLog.Size = new Size(458, 388);
             textBoxLog.TabIndex = 1;
+            textBoxLog.WordWrap = true;
             // 
-            // labelUrl
+            // labelUrlPrefix
             // 
-            labelUrl.AutoSize = true;
-            labelUrl.Font = new Font("Segoe UI", 12F);
-            labelUrl.Location = new Point(12, 360);
-            labelUrl.Name = "labelUrl";
-            labelUrl.Size = new Size(95, 21);
-            labelUrl.TabIndex = 2;
-            labelUrl.Text = "Server URL: ";
+            labelUrlPrefix.AutoSize = true;
+            labelUrlPrefix.Location = new Point(12, 362);
+            labelUrlPrefix.Name = "labelUrlPrefix";
+            labelUrlPrefix.Size = new Size(67, 15);
+            labelUrlPrefix.TabIndex = 10;
+            labelUrlPrefix.Text = "Server URL:";
+            // 
+            // textBoxUrl
+            // 
+            textBoxUrl.Location = new Point(85, 360);
+            textBoxUrl.Name = "textBoxUrl";
+            textBoxUrl.ReadOnly = true;
+            textBoxUrl.Size = new Size(227, 23);
+            textBoxUrl.TabIndex = 2;
+            textBoxUrl.Text = "";
             // 
             // buttonStart
             // 
             buttonStart.Location = new Point(12, 12);
             buttonStart.Name = "buttonStart";
             buttonStart.Size = new Size(100, 30);
-            buttonStart.TabIndex = 3;
+            buttonStart.TabIndex = 4;
             buttonStart.Text = "Start Server";
             buttonStart.UseVisualStyleBackColor = true;
             buttonStart.Click += buttonStart_Click;
@@ -99,7 +110,7 @@
             buttonStop.Location = new Point(118, 12);
             buttonStop.Name = "buttonStop";
             buttonStop.Size = new Size(100, 30);
-            buttonStop.TabIndex = 4;
+            buttonStop.TabIndex = 5;
             buttonStop.Text = "Stop Server";
             buttonStop.UseVisualStyleBackColor = true;
             buttonStop.Click += buttonStop_Click;
@@ -110,7 +121,7 @@
             labelPort.Location = new Point(240, 18);
             labelPort.Name = "labelPort";
             labelPort.Size = new Size(32, 15);
-            labelPort.TabIndex = 5;
+            labelPort.TabIndex = 6;
             labelPort.Text = "Port:";
             // 
             // numericUpDownPort
@@ -120,7 +131,7 @@
             numericUpDownPort.Minimum = new decimal(new int[] { 1024, 0, 0, 0 });
             numericUpDownPort.Name = "numericUpDownPort";
             numericUpDownPort.Size = new Size(80, 23);
-            numericUpDownPort.TabIndex = 6;
+            numericUpDownPort.TabIndex = 7;
             numericUpDownPort.Value = new decimal(new int[] { 8080, 0, 0, 0 });
             // 
             // checkBoxDebugLog
@@ -129,7 +140,7 @@
             checkBoxDebugLog.Location = new Point(380, 18);
             checkBoxDebugLog.Name = "checkBoxDebugLog";
             checkBoxDebugLog.Size = new Size(81, 19);
-            checkBoxDebugLog.TabIndex = 7;
+            checkBoxDebugLog.TabIndex = 8;
             checkBoxDebugLog.Text = "Debug log";
             checkBoxDebugLog.UseVisualStyleBackColor = true;
             checkBoxDebugLog.CheckedChanged += checkBoxDebugLog_CheckedChanged;
@@ -140,7 +151,7 @@
             checkBoxSecureMode.Location = new Point(480, 18);
             checkBoxSecureMode.Name = "checkBoxSecureMode";
             checkBoxSecureMode.Size = new Size(95, 19);
-            checkBoxSecureMode.TabIndex = 8;
+            checkBoxSecureMode.TabIndex = 9;
             checkBoxSecureMode.Text = "Secure mode";
             checkBoxSecureMode.UseVisualStyleBackColor = true;
             // 
@@ -150,7 +161,7 @@
             buttonCopyUrl.Location = new Point(12, 390);
             buttonCopyUrl.Name = "buttonCopyUrl";
             buttonCopyUrl.Size = new Size(100, 30);
-            buttonCopyUrl.TabIndex = 9;
+            buttonCopyUrl.TabIndex = 10;
             buttonCopyUrl.Text = "Copy URL";
             buttonCopyUrl.UseVisualStyleBackColor = true;
             buttonCopyUrl.Click += buttonCopyUrl_Click;
@@ -167,7 +178,8 @@
             Controls.Add(labelPort);
             Controls.Add(buttonStop);
             Controls.Add(buttonStart);
-            Controls.Add(labelUrl);
+            Controls.Add(textBoxUrl);
+            Controls.Add(labelUrlPrefix);
             Controls.Add(textBoxLog);
             Controls.Add(pictureBoxQR);
             Icon = (Icon)resources.GetObject("$this.Icon");

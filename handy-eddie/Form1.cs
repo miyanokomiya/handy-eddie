@@ -39,7 +39,7 @@ namespace handy_eddie
                 }
                 
                 currentServerUrl = url;
-                labelUrl.Text = $"Server URL: {url}";
+                textBoxUrl.Text = url;
 
                 GenerateQRCode(url);
 
@@ -116,7 +116,7 @@ namespace handy_eddie
                 server = null;
                 currentServerUrl = null;
                 pictureBoxQR.Image = null;
-                labelUrl.Text = "Server URL: ";
+                textBoxUrl.Text = "";
                 buttonStart.Enabled = true;
                 buttonStop.Enabled = false;
                 buttonCopyUrl.Enabled = false;
