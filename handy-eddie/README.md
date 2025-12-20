@@ -29,26 +29,11 @@ A web server and mobile web client that allows you to control your Windows mouse
 ### Prerequisites
 
 - .NET 10 SDK
-- Node.js (for building the client)
-
-### Building the Client
-
-1. Navigate to the client directory:
-   ```bash
-   cd handy-eddie\client
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Build the client (output goes to `wwwroot`):
-   ```bash
-   npm run build
-   ```
+- Node.js (for client dependencies)
 
 ### Running the Server
+
+The client is built automatically when you build the .NET application.
 
 1. Build and run the .NET application:
    ```bash
@@ -61,6 +46,8 @@ A web server and mobile web client that allows you to control your Windows mouse
 3. Scan the QR code with your mobile device or manually enter the URL shown
 
 4. Use your mobile device to control the mouse!
+
+**Note:** The first build may take longer as it installs npm dependencies and builds the client application automatically.
 
 ## JSON Protocol
 
