@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'preact/hooks'
 import { Settings } from './Settings'
 import { SystemCommands } from './SystemCommands'
 import { Touchpad } from './Touchpad'
+import { VerticalScrollBar } from './VerticalScrollBar'
+import { HorizontalScrollBar } from './HorizontalScrollBar'
+import { MouseButtons } from './MouseButtons'
 
 interface MouseAction {
   type: 'move' | 'click' | 'scroll' | 'system'
@@ -41,11 +44,7 @@ export function App() {
     return saved ? parseFloat(saved) : DEFAULT_SENSITIVITY.SCROLL
   })
   const wsRef = useRef<WebSocket | null>(null)
-  const vScrollBarRef = useRef<HTMLDivElement>(null)
-  const hScrollBarRef = useRef<HTMLDivElement>(null)
   const reconnectTimeoutRef = useRef<number | null>(null)
-  const isScrollingRef = useRef(false)
-  const scrollLastPosRef = useRef({ x: 0, y: 0 })
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
@@ -137,104 +136,6 @@ export function App() {
     sendCommand({ type: 'system', command })
   }
 
-  const handleVScrollTouchStart = (e: TouchEvent) => {
-    e.preventDefault()
-    isScrollingRef.current = true
-    const touch = e.touches[0]
-    scrollLastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
-
-  const handleVScrollTouchMove = (e: TouchEvent) => {
-    e.preventDefault()
-    if (!isScrollingRef.current) return
-
-    const touch = e.touches[0]
-    const deltaY = touch.clientY - scrollLastPosRef.current.y
-
-    const scrollAmount = Math.round(deltaY * scrollSensitivity)
-
-    if (Math.abs(scrollAmount) > 0) {
-      sendCommand({
-        type: 'scroll',
-        deltaX: 0,
-        deltaY: scrollAmount
-      })
-    }
-
-    scrollLastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
-
-  const handleVScrollTouchEnd = (e: TouchEvent) => {
-    e.preventDefault()
-    isScrollingRef.current = false
-  }
-
-  const handleHScrollTouchStart = (e: TouchEvent) => {
-    e.preventDefault()
-    isScrollingRef.current = true
-    const touch = e.touches[0]
-    scrollLastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
-
-  const handleHScrollTouchMove = (e: TouchEvent) => {
-    e.preventDefault()
-    if (!isScrollingRef.current) return
-
-    const touch = e.touches[0]
-    const deltaX = touch.clientX - scrollLastPosRef.current.x
-
-    const scrollAmount = Math.round(deltaX * scrollSensitivity)
-
-    if (Math.abs(scrollAmount) > 0) {
-      sendCommand({
-        type: 'scroll',
-        deltaX: scrollAmount,
-        deltaY: 0
-      })
-    }
-
-    scrollLastPosRef.current = { x: touch.clientX, y: touch.clientY }
-  }
-
-  const handleHScrollTouchEnd = (e: TouchEvent) => {
-    e.preventDefault()
-    isScrollingRef.current = false
-  }
-
-  useEffect(() => {
-    const vScrollBar = vScrollBarRef.current
-    if (vScrollBar && isTouchDevice) {
-      vScrollBar.addEventListener('touchstart', handleVScrollTouchStart, { passive: false })
-      vScrollBar.addEventListener('touchmove', handleVScrollTouchMove, { passive: false })
-      vScrollBar.addEventListener('touchend', handleVScrollTouchEnd, { passive: false })
-
-      return () => {
-        vScrollBar.removeEventListener('touchstart', handleVScrollTouchStart)
-        vScrollBar.removeEventListener('touchmove', handleVScrollTouchMove)
-        vScrollBar.removeEventListener('touchend', handleVScrollTouchEnd)
-      }
-    }
-  }, [isTouchDevice, scrollSensitivity])
-
-  useEffect(() => {
-    const hScrollBar = hScrollBarRef.current
-    if (hScrollBar && isTouchDevice) {
-      hScrollBar.addEventListener('touchstart', handleHScrollTouchStart, { passive: false })
-      hScrollBar.addEventListener('touchmove', handleHScrollTouchMove, { passive: false })
-      hScrollBar.addEventListener('touchend', handleHScrollTouchEnd, { passive: false })
-
-      return () => {
-        hScrollBar.removeEventListener('touchstart', handleHScrollTouchStart)
-        hScrollBar.removeEventListener('touchmove', handleHScrollTouchMove)
-        hScrollBar.removeEventListener('touchend', handleHScrollTouchEnd)
-      }
-    }
-  }, [isTouchDevice, scrollSensitivity])
-
-  const handleClick = (button: 'left' | 'right' | 'middle') => {
-    sendCommand({ type: 'click', button })
-  }
-
   const handleReconnect = () => {
     if (wsRef.current) {
       wsRef.current.close()
@@ -287,55 +188,24 @@ export function App() {
 
         {/* Vertical Scroll Bar - Only on touch devices */}
         {isTouchDevice && (
-          <div
-            ref={vScrollBarRef}
-            className="w-16 bg-gray-600 rounded-lg flex items-center justify-center touch-none select-none active:bg-gray-500"
-          >
-            <div className="text-gray-400 text-center pointer-events-none">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
-            </div>
-          </div>
+          <VerticalScrollBar
+            scrollSensitivity={scrollSensitivity}
+            onSendCommand={sendCommand}
+          />
         )}
       </div>
 
       {/* Horizontal Scroll Bar - Only on touch devices */}
       <div className="px-2 pb-2">
         {isTouchDevice && (
-          <div
-            ref={hScrollBarRef}
-            className="h-16 bg-gray-600 rounded-lg flex items-center justify-center touch-none select-none active:bg-gray-500 mb-2"
-          >
-            <div className="text-gray-400 text-center pointer-events-none">
-              <svg className="w-6 h-6 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
-            </div>
-          </div>
+          <HorizontalScrollBar
+            scrollSensitivity={scrollSensitivity}
+            onSendCommand={sendCommand}
+          />
         )}
 
         {/* Button Controls */}
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={() => handleClick('left')}
-            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-colors"
-          >
-            Left Click
-          </button>
-          <button
-            onClick={() => handleClick('middle')}
-            className="bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-colors"
-          >
-            Middle
-          </button>
-          <button
-            onClick={() => handleClick('right')}
-            className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-colors"
-          >
-            Right Click
-          </button>
-        </div>
+        <MouseButtons onSendCommand={sendCommand} />
       </div>
 
       {/* Settings Panel */}
