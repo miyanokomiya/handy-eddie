@@ -6,15 +6,17 @@ import { Touchpad } from './Touchpad'
 import { VerticalScrollBar } from './VerticalScrollBar'
 import { HorizontalScrollBar } from './HorizontalScrollBar'
 import { MouseButtons } from './MouseButtons'
+import { TextInput } from './TextInput'
 
 interface MouseAction {
-  type: 'move' | 'click' | 'scroll' | 'system'
+  type: 'move' | 'click' | 'scroll' | 'system' | 'keyboard'
   x?: number
   y?: number
   button?: 'left' | 'right' | 'middle' | 'back' | 'forward'
   deltaX?: number
   deltaY?: number
   command?: string
+  text?: string
 }
 
 const STORAGE_KEYS = {
@@ -184,6 +186,8 @@ export function App() {
         )}
 
         <MouseButtons onSendCommand={sendCommand} />
+        
+        <TextInput onSendCommand={sendCommand} connected={connected} />
       </div>
 
       <Settings

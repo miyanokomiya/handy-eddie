@@ -1,15 +1,18 @@
 # Handy Eddie - Mobile Mouse Controller
 
-A web server and mobile web client that allows you to control your Windows mouse pointer from your mobile device via WebSocket.
+A web server and mobile web client that allows you to control your Windows mouse pointer and keyboard from your mobile device via WebSocket.
 
 ## Features
 
 - Control Windows mouse pointer from mobile device
+- Send keyboard text input to the server PC
 - Portrait-first responsive UI
 - WebSocket communication with human-readable JSON protocol
 - QR code for easy connection
 - Touch-based trackpad with relative mouse movement
-- Left, right, and middle click buttons
+- Left, right, middle, back, and forward click buttons
+- Vertical and horizontal scrolling
+- System commands (sleep, shutdown, restart, lock)
 
 ## Setup Instructions
 
@@ -68,14 +71,41 @@ A web server and mobile web client that allows you to control your Windows mouse
 }
 ```
 
-Button options: `"left"`, `"right"`, `"middle"`
+Button options: `"left"`, `"right"`, `"middle"`, `"back"`, `"forward"`
+
+### Keyboard Action
+```json
+{
+  "type": "keyboard",
+  "text": "Hello, World!"
+}
+```
+
+### Scroll Action
+```json
+{
+  "type": "scroll",
+  "deltaX": 0,
+  "deltaY": 120
+}
+```
+
+### System Command Action
+```json
+{
+  "type": "system",
+  "command": "sleep"
+}
+```
+
+Commands: `"sleep"`, `"shutdown"`, `"restart"`, `"lock"`
 
 ## Architecture
 
 - **Server**: C# WinForms application with HttpListener for serving static files and WebSocket support
 - **Client**: Vite + Preact + TypeScript + Tailwind CSS
 - **Communication**: WebSocket with JSON messages
-- **Mouse Control**: Windows API via P/Invoke
+- **Input Control**: Windows API via P/Invoke (mouse, keyboard, and system commands)
 
 ## Development
 

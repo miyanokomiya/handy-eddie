@@ -12,6 +12,7 @@ namespace handy_eddie
         private readonly int port;
         private readonly MouseController mouseController;
         private readonly SystemController systemController;
+        private readonly KeyboardController keyboardController;
         private HttpListener? httpListener;
         private bool isRunning;
         private bool debugLogging = true;
@@ -23,6 +24,7 @@ namespace handy_eddie
             this.port = port;
             this.mouseController = new MouseController();
             this.systemController = new SystemController();
+            this.keyboardController = new KeyboardController();
             this.systemController.LogMessage += (s, msg) => LogMessage?.Invoke(this, msg);
         }
 
@@ -283,6 +285,40 @@ namespace handy_eddie
                             var command = commandElement.GetString() ?? "";
                             LogMessage?.Invoke(this, $"System command: {command}");
                             systemController.ExecuteCommand(command);
+                        }
+                        break;
+
+                    case "keyboard":
+                        if (root.TryGetProperty("text", out var textElement))
+                        {
+                            var text = textElement.GetString() ?? "";
+                            
+                            // If text is just a newline, send Enter key
+                            if (text == "\n")
+                            {
+                                keyboardController.SendEnter();
+                                if (debugLogging)
+                                {
+                                    LogMessage?.Invoke(this, "Keyboard: Enter");
+                                }
+                            }
+                            else
+                            {
+                                keyboardController.SendText(text);
+                                
+                                // Check if we should send Enter after the text
+                                if (root.TryGetProperty("sendEnter", out var sendEnterElement) && 
+                                    sendEnterElement.GetBoolean())
+                                {
+                                    keyboardController.SendEnter();
+                                }
+                                
+                                if (debugLogging)
+                                {
+                                    var enterSuffix = root.TryGetProperty("sendEnter", out var se) && se.GetBoolean() ? " + Enter" : "";
+                                    LogMessage?.Invoke(this, $"Keyboard: {text}{enterSuffix}");
+                                }
+                            }
                         }
                         break;
                 }
