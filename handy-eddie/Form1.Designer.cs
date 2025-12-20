@@ -15,6 +15,7 @@
         private Label labelPort;
         private CheckBox checkBoxDebugLog;
         private CheckBox checkBoxSecureMode;
+        private Button buttonCopyUrl;
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -47,6 +48,7 @@
             numericUpDownPort = new NumericUpDown();
             checkBoxDebugLog = new CheckBox();
             checkBoxSecureMode = new CheckBox();
+            buttonCopyUrl = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBoxQR).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownPort).BeginInit();
             SuspendLayout();
@@ -142,11 +144,23 @@
             checkBoxSecureMode.Text = "Secure mode";
             checkBoxSecureMode.UseVisualStyleBackColor = true;
             // 
+            // buttonCopyUrl
+            // 
+            buttonCopyUrl.Enabled = false;
+            buttonCopyUrl.Location = new Point(12, 390);
+            buttonCopyUrl.Name = "buttonCopyUrl";
+            buttonCopyUrl.Size = new Size(100, 30);
+            buttonCopyUrl.TabIndex = 9;
+            buttonCopyUrl.Text = "Copy URL";
+            buttonCopyUrl.UseVisualStyleBackColor = true;
+            buttonCopyUrl.Click += buttonCopyUrl_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(buttonCopyUrl);
             Controls.Add(checkBoxSecureMode);
             Controls.Add(checkBoxDebugLog);
             Controls.Add(numericUpDownPort);

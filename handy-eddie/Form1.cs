@@ -6,6 +6,7 @@ namespace handy_eddie
     public partial class Form1 : Form
     {
         private WebSocketServer? server;
+        private string? currentServerUrl;
 
         public Form1()
         {
@@ -37,12 +38,14 @@ namespace handy_eddie
                     url += $"?code={server.SecurityCode}";
                 }
                 
+                currentServerUrl = url;
                 labelUrl.Text = $"Server URL: {url}";
 
                 GenerateQRCode(url);
 
                 buttonStart.Enabled = false;
                 buttonStop.Enabled = true;
+                buttonCopyUrl.Enabled = true;
                 numericUpDownPort.Enabled = false;
                 checkBoxSecureMode.Enabled = false;
 
@@ -79,6 +82,23 @@ namespace handy_eddie
             StopServer();
         }
 
+        private void buttonCopyUrl_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(currentServerUrl))
+            {
+                try
+                {
+                    Clipboard.SetText(currentServerUrl);
+                    LogMessage("URL copied to clipboard");
+                }
+                catch (Exception ex)
+                {
+                    LogMessage($"Error copying URL: {ex.Message}");
+                    MessageBox.Show($"Failed to copy URL: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
         private void checkBoxDebugLog_CheckedChanged(object sender, EventArgs e)
         {
             if (server != null)
@@ -94,10 +114,12 @@ namespace handy_eddie
             {
                 server.Stop();
                 server = null;
+                currentServerUrl = null;
                 pictureBoxQR.Image = null;
                 labelUrl.Text = "Server URL: ";
                 buttonStart.Enabled = true;
                 buttonStop.Enabled = false;
+                buttonCopyUrl.Enabled = false;
                 numericUpDownPort.Enabled = true;
                 checkBoxSecureMode.Enabled = true;
                 LogMessage("Server stopped");
