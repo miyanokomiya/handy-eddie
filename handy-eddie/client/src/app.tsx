@@ -154,7 +154,7 @@ export function App() {
   }
 
   return (
-    <div className="flex flex-col h-dvh bg-gray-900 text-white">
+    <div className="flex flex-col h-dvh text-white">
       <Header
         connected={connected}
         isReconnecting={isReconnecting}
