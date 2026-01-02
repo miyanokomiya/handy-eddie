@@ -26,7 +26,8 @@ const STORAGE_KEYS = {
   MOUSE_SENSITIVITY: 'handy-eddie_mouseSensitivity',
   SCROLL_SENSITIVITY: 'handy-eddie_scrollSensitivity',
   SHOW_VIDEO_CONTROLS: 'handy-eddie_showVideoControls',
-  SHOW_ARROW_CONTROLS: 'handy-eddie_showArrowControls'
+  SHOW_ARROW_CONTROLS: 'handy-eddie_showArrowControls',
+  USE_JOYSTICK: 'handy-eddie_useJoystick'
 } as const
 
 const DEFAULT_SENSITIVITY = {
@@ -60,6 +61,10 @@ export function App() {
     const saved = localStorage.getItem(STORAGE_KEYS.SHOW_ARROW_CONTROLS)
     return saved ? saved === 'true' : false
   })
+  const [useJoystick, setUseJoystick] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.USE_JOYSTICK)
+    return saved ? saved === 'true' : false
+  })
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<number | null>(null)
   const textInputRef = useRef<TextInputHandle>(null)
@@ -80,6 +85,10 @@ export function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SHOW_ARROW_CONTROLS, showArrowControls.toString())
   }, [showArrowControls])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.USE_JOYSTICK, useJoystick.toString())
+  }, [useJoystick])
 
   const connectWebSocket = () => {
     if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) return
@@ -195,6 +204,7 @@ export function App() {
           isReconnecting={isReconnecting}
           mouseSensitivity={mouseSensitivity}
           heldButton={heldButton}
+          useJoystick={useJoystick}
           onSendCommand={sendCommand}
           onReconnect={handleReconnect}
         />
@@ -246,6 +256,8 @@ export function App() {
         onShowVideoControlsChange={setShowVideoControls}
         showArrowControls={showArrowControls}
         onShowArrowControlsChange={setShowArrowControls}
+        useJoystick={useJoystick}
+        onUseJoystickChange={setUseJoystick}
       />
 
       <SystemCommands

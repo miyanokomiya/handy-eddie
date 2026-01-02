@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'preact/hooks'
+import { Joystick } from './Joystick'
 
 interface TouchpadProps {
   connected: boolean
@@ -6,6 +7,7 @@ interface TouchpadProps {
   isReconnecting: boolean
   mouseSensitivity: number
   heldButton: 'left' | 'right' | 'middle' | null
+  useJoystick: boolean
   onSendCommand: (action: MouseAction) => void
   onReconnect: () => void
 }
@@ -26,6 +28,7 @@ export function Touchpad({
   isReconnecting,
   mouseSensitivity,
   heldButton,
+  useJoystick,
   onSendCommand,
   onReconnect
 }: TouchpadProps) {
@@ -273,51 +276,59 @@ export function Touchpad({
           : 'bg-gray-700'
       }`}
       style={{ cursor: pointerLocked ? 'none' : 'pointer' }}
-      onClick={connected ? handleMouseClick : undefined}
-      onMouseMove={connected ? handleMouseMove : undefined}
-      onMouseDown={connected ? handleMouseDown : undefined}
-      onMouseUp={connected ? handleMouseUp : undefined}
+      onClick={connected && !useJoystick ? handleMouseClick : undefined}
+      onMouseMove={connected && !useJoystick ? handleMouseMove : undefined}
+      onMouseDown={connected && !useJoystick ? handleMouseDown : undefined}
+      onMouseUp={connected && !useJoystick ? handleMouseUp : undefined}
       onContextMenu={handleContextMenu}
     >
-      <div className="text-gray-400 text-center pointer-events-none">
-        {!connected && hasAttemptedConnection && !pointerLocked && (
-          <>
-            <p className="text-xl font-semibold text-red-400 mb-3">Not Connected</p>
-            <button
-              onClick={onReconnect}
-              disabled={isReconnecting}
-              className={`pointer-events-auto px-6 py-3 rounded-lg font-semibold text-lg transition-colors ${isReconnecting
-                ? 'bg-yellow-600 cursor-wait'
-                : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
-                }`}
-            >
-              {isReconnecting ? 'Connecting...' : 'Reconnect'}
-            </button>
-          </>
-        )}
-        {
-          connected ? (
+      {useJoystick ? (
+        <Joystick
+          connected={connected}
+          mouseSensitivity={mouseSensitivity}
+          onSendCommand={onSendCommand}
+        />
+      ) : (
+        <div className="text-gray-400 text-center pointer-events-none">
+          {!connected && hasAttemptedConnection && !pointerLocked && (
             <>
-              <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-              </svg>
-              {pointerLocked ? (
-                <>
-                  <p className="text-xl font-semibold text-green-400 mb-1">Mouse Locked</p>
-                  <p className="text-lg">Move mouse to control cursor</p>
-                  <p className="text-lg">Hold and drag to select</p>
-                  <p className="text-lg">Press ESC to exit</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-lg">Touch: Tap to click, hold button + swipe to drag</p>
-                  <p className="text-lg mt-1">Mouse: Click to lock</p>
-                </>
-              )}
+              <p className="text-xl font-semibold text-red-400 mb-3">Not Connected</p>
+              <button
+                onClick={onReconnect}
+                disabled={isReconnecting}
+                className={`pointer-events-auto px-6 py-3 rounded-lg font-semibold text-lg transition-colors ${isReconnecting
+                  ? 'bg-yellow-600 cursor-wait'
+                  : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                  }`}
+              >
+                {isReconnecting ? 'Connecting...' : 'Reconnect'}
+              </button>
             </>
-          ) : undefined
-        }
-      </div>
+          )}
+          {
+            connected ? (
+              <>
+                <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                </svg>
+                {pointerLocked ? (
+                  <>
+                    <p className="text-xl font-semibold text-green-400 mb-1">Mouse Locked</p>
+                    <p className="text-lg">Move mouse to control cursor</p>
+                    <p className="text-lg">Hold and drag to select</p>
+                    <p className="text-lg">Press ESC to exit</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg">Touch: Tap to click, hold button + swipe to drag</p>
+                    <p className="text-lg mt-1">Mouse: Click to lock</p>
+                  </>
+                )}
+              </>
+            ) : undefined
+          }
+        </div>
+      )}
     </div>
   )
 }
